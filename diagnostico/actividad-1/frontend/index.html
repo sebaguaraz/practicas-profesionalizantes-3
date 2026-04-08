@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./style/index.css">
+</head>
+
+<body>
+
+    <main class="main_content">
+
+        
+        <div class="main_header">
+            <h1>Sistema de Gestión de datos para la Administración de Stock para Planta de Reciclaje</h1>
+            <div id="message"></div>
+
+        </div>
+
+        <section class="section_create">
+            <h2>Ingreso de Mercaderia - ADMINISTRADOR</h2>
+
+            <form id="form_create_materials">
+                <label for="nombre">Nombre del Material: </label>
+                <input type="text" id="nombre" placeholder="Vidrio" name="name">
+                <br>
+                <label for="stock_numerico">Cantidad de Stock: </label>
+                <input type="number" id="stock_numerico" placeholder="3" name="stock" min="0">
+                <br>
+                <label for="price">Precio del Material: $</label>
+                <input type="number" id="price" placeholder="1200.0" name="price" min="0">
+                <br>
+                <label for="units">Unidad del material: </label>
+                <select id="units" name="units">
+                    <option value="">-- Selecciona una unidad --</option>
+                    <option value="kg">Kilogramos (kg)</option>
+                    <option value="m^3">Metros cúbicos (m³)</option>
+                    <option value="unidad">Unidad</option>
+                </select>
+
+                <button type="submit" id="buttonSubmit">Enviar</button>
+            </form>
+
+            <table border="2">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Stock</th>
+                        <th>Price</th>
+                        <th>Units</th>
+                        <th>State</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody class="tbody_materials">
+
+
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Actualizacion de Stock y Precio - ADMINISTRADOR</h2>
+            <span>Gestione su mercaderia para clientes </span>
+            <form class="form_update_materials">
+                <div id="id_material"></div>
+                <br>
+                <label for="stock_numerico">Stock a Actualizar: </label>
+                <input type="number" id="stock_numerico" placeholder="33" name="stock" min="0">
+                <br>
+                <label for="price">Precio a Actualizar: $</label>
+                <input type="number" id="price" placeholder="1200.0" name="price" min="0">
+
+                <button type="submit" id="buttonSubmit">Enviar</button>
+            </form>
+
+        </section>
+
+
+        <section>
+            <h2>Compra de Mercaderia - CLIENTE</h2>
+            <span>Gestione su Carrito </span>
+
+            <form class="form_decrement_materials">
+                <label for="idMaterial">ID Material: </label>
+                <input type="number" id="idMaterial" placeholder="Ingrese ID..." name="id" min="0">
+                <br>
+                <label for="stock_numerico">Cantidad de compra: </label>
+                <input type="number" id="stock_numerico" placeholder="0" name="stock" min="0">
+
+                <button type="submit" id="buttonSubmit">Comprar</button>
+            </form>
+
+        </section>
+
+    </main>
+
+
+</body>
+
+<script src="./index.js"></script>
+
+</html>

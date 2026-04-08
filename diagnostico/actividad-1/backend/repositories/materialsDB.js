@@ -1,4 +1,3 @@
-const materialsController = require("../controllers/materialsController");
 const pool = require("../../db");
 
 const materialsDB = {
@@ -38,15 +37,15 @@ const materialsDB = {
     },
 
 
-    updatematerials: async (stock,id) => {
+    updatematerials: async (stock, price,id) => {
 
         try {
             
-            const query = `UPDATE fabrica_stock SET stock = stock + ? WHERE id = ?`;
+            const query = `UPDATE fabrica_stock SET stock = stock + ?, price = ? WHERE id = ?`;
 
             // pool en UPDATE devuelve un array q tiene 2 array dentro [ [fila1, fila2], [datos_técnicos] ]. Nos interesa el primer array. En
             // object.affectedRows: numero de filas modificadas "si es mayor a 1"
-            const rows = await pool.query(query, [stock, id]);
+            const rows = await pool.query(query, [stock,price , id]);
 
             const result = rows[0].affectedRows > 0 ? { message: "Material actualizado exitosamente" } : { message: "No se realizo actualizacion" };
             return result;
@@ -62,6 +61,7 @@ const materialsDB = {
         // SELECT devuelve un array q tiene 2 array dentro [ [fila1, fila2], [datos_técnicos] ], el primero es el q nos interesa. Los datos o un array vacio
         const query = `SELECT stock FROM fabrica_stock WHERE id = ?`;
         const rows = await pool.query(query, [id]);
+        console.log(rows[0])
         return rows[0];
 
     },

@@ -1,8 +1,13 @@
 const express = require("express");
-const materialsRoutes = require("../backend/routers/materialsRouter");
+const materialsRoutes = require("./routers/materialsRouter");
 const app = express();
 
-// Lo que hace express.json(): Agarra ese texto, lo "parsea" (lo traduce) y lo convierte en un Objeto de JavaScript.
+const path = require("path");
+// * el servidor utiliza express.static() para servir todos los archivos que estan en la carpeta frontend desde si mismo al navegador cuando ni bien entra a localhost:3000 o hacen una peticion.
+// * Cuando tu JS hace el fetch('/api/datos'), le está hablando al mismo servidor que le dio los archivos hace un segundo.
+app.use(express.static(path.join(__dirname,`../frontend`)));
+
+// * Lo que hace express.json(): Express crea el objeto req al instante cuando hay una peticion que pega en el servidor. Cuando llega a esta linea crea ".body" y la llena con la informacion q viene en el body del lado del cliente, lo "parsea" (lo traduce) y lo convierte en un Objeto de JavaScript. Lo guarda en req.body y express me pasa ese objeto req con req.body a mi funcion (req, res) => {...}
 app.use(express.json());
 
 app.get("/api/ping", (req, res)=>{
@@ -16,7 +21,7 @@ const puerto = 3000;
 function init(){
     console.log(`Servidor escuchando en puerto http://localhost:${puerto}`)
 }
-
+// el servidor escucha si alguna peticion pega en el.
 app.listen(puerto, init);
 
 

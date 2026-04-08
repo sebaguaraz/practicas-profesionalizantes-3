@@ -1,5 +1,5 @@
 // importa la conexion a la db con el usuario para acceder a la base de datos
-const materialsDB = require("../repositories/materialsDB.js");
+const materialsDB = require("../repositories/materialsDB");
 
 const materialsController = {
     getmaterials: async (req, res) => {
@@ -27,7 +27,8 @@ const materialsController = {
 
         const units_declared = ["kg", "m^3", "unidad"]
 
-        const { name, stock, price, units, state } = req.body;
+        const { name, stock, price, units } = req.body;
+        const state = 1;
 
 
 
@@ -41,7 +42,7 @@ const materialsController = {
         try {
             const material = await materialsDB.getmaterialByname(name);
             if (material.length > 0) {
-                res.status(400).json({ error: "Error, el material ya existe." });
+                res.status(400).json({ message: "el material ya existe." });
                 return;
             }
 
@@ -51,33 +52,27 @@ const materialsController = {
 
         } catch (err) {
             res.status(500).json({ error: err.message });
+            console.log(err)
         }
     },
 
 
     updatematerials: async (req, res) => {
-        const { stock, name } = req.body;
-        const id = req.params.id;
+        const { stock, price } = req.body;
+        const id = req.params.idMaterial;
 
         try {
-            if (!name || !stock ) {
-                res.status(400).json({ message: "Faltan campos requeridos: name, stock" });
+            if (!stock || !price) {
+                res.status(400).json({ message: "Faltan campos requeridos: stock, price" });
                 return;
             }
             
-            const material = await materialsDB.getmaterialByname(name);
-            
-            if (material.length === 0 || !material) {
-                res.status(400).json({ message: "El material no se encuentra en el catalogo o error en el servidor" });
+            if (stock <= 0 || price <= 0) {
+                res.status(400).json({ message: "La operacion no se pudo realizar. Precio y Stock deben ser mayor a 0 " });
                 return;
             }
 
-            if (stock <= 0 ) {
-                res.status(400).json({ message: "La operacion no se pudo realizar. Stock < 0 " });
-                return;
-            }
-
-            const result = await materialsDB.updatematerials(stock,id);
+            const result = await materialsDB.updatematerials(stock, price,id);
 
             res.json(result);
 
@@ -97,20 +92,20 @@ const materialsController = {
 
     buymaterials: async (req, res) => {
         const { stock } = req.body;
-        const id = req.params.id;
+        const id = req.params.idMaterial;
         try {
             if (stock < 0 || isNaN(stock) || !stock) {
                 res.status(400).json({ message: "El stock debe ser mayor a 0 y ser un numero entero" });
                 return;
             }
 
-            const verifyStock = await materialsDB.getStockFromMaterial(id);
+            const verifyStock = await materialsDB.getStockFromMaterial(id); // * devuelve un [1,2,3,...] con elementos
             if (!verifyStock || verifyStock.length === 0) {
                 res.status(400).json({ message: "Material no encontrado" });
                 return;
             }
 
-            const currentStock = verifyStock[0].stock;
+            const currentStock = verifyStock[0].stock; // * accedo a la propiedad de ese elemento en la pos 0 del array 
             if (currentStock < stock) {
                 res.status(400).json({ message: "No hay suficiente stock disponible. Stock actual: " + currentStock });
                 return;

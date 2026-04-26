@@ -19,7 +19,9 @@ async function register(objetoResultante, db) {
   try {
 
     const result = await insertarUsuario(db, username, password)
-    return { 'Usuario insertado: ': result };
+    
+    const {id, ...objectResult} = result
+    return { 'Usuario insertado: ': objectResult };
 
 
   } catch (error) {

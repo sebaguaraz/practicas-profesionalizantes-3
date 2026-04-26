@@ -5,13 +5,92 @@
 		<title>Login</title>
 	</head>
 	<body>
-		<h1>Registro de usuarios</h1>
+		<!-- <h1>Registro de usuarios</h1>
 		<form action="/register" method="post">
 			<label>Usuario:</label>
 			<input name="username" type="text"><br>
 			<label>Password:</label>
 			<input type="password" name="password"><br>
 			<button type="submit">Crear usuario</button>
-		</form>
+		</form> -->
 	</body>
+
+	<script>
+
+		class FormCreateUser extends HTMLElement{
+		
+			constructor(){
+
+				super();
+			
+				this.form = document.createElement("form");
+				this.label_username = document.createElement("label");
+				this.label_password = document.createElement("label");
+				this.input_username = document.createElement("input");
+				this.input_password = document.createElement("input");
+				this.br1 = document.createElement("br");
+				this.br2 = document.createElement("br");
+				this.bttn_createUser = document.createElement("button");
+
+				this.label_username.textContent = "Usuario: ";
+				this.label_username.htmlFor = "username"
+				this.input_username.type = "text";
+				this.input_username.id = "username";
+				this.input_username.name = "username"
+				
+				this.label_password.textContent = "Password: ";
+				this.label_password.htmlFor = "password"
+				
+				this.input_username.type = "password";
+				this.input_password.id = "password"
+				this.input_password.name = "password"
+
+				this.bttn_createUser.textContent = "crea usuario"
+				this.bttn_createUser.type ="submit"
+
+				this.form.appendChild(this.label_username)
+				this.form.appendChild(this.input_username)
+				this.form.appendChild(this.br1)
+				this.form.appendChild(this.label_password)
+				this.form.appendChild(this.input_password)
+				this.form.appendChild(this.br1)
+				this.form.appendChild(this.bttn_createUser)
+
+
+				this.form.action = "/register"
+				this.form.method = "post"
+
+				this.appendChild(this.form)
+							
+			}
+		
+			
+			connectedCallback(){
+				console.log("hola")
+			}
+			
+			
+			
+			disconnectCallback(){
+			}
+		
+		
+		
+		
+		}
+
+		customElements.define("form-create-user", FormCreateUser);
+
+
+		function main(){
+		
+		const form = new FormCreateUser();
+		document.body.appendChild(form);
+		
+		
+		}
+
+		window.onload = main
+	</script>
+
 </html>

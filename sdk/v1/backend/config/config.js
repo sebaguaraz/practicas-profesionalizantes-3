@@ -5,7 +5,7 @@ const console = require('node:console');
 
     function load_config() {
         try {
-            const data = readFileSync("./config.json", "utf8");
+            const data = readFileSync("./config/config.json", "utf8");
 
             const config = JSON.parse(data);
             console.log("Configuración cargada correctamente.");

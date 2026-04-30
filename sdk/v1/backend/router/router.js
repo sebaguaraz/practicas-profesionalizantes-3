@@ -3,11 +3,12 @@ const { login_handler, register_handler } = require('../controller/authHandler')
 
 //Mecanismo de ruteo/despacho
 
-function routes(resultConfig, ObjectDB){
+function routes(resultConfig, ObjectDB) {
 
     let router = new Map();
-    
-    // *si creo un callback, esta ejecutando ese callback y dentro del callback se ejecuta el default_handler
+
+    // * Guardo una función anónima que, al ejecutarse en el dispatcher, llama a default_handler
+    // * pasando request, response y resultConfig.
     router.set('/', (request, response) => default_handler(request, response, resultConfig));
     router.set('/login', (request, response) => login_handler(request, response, resultConfig));
     router.set('/register', (request, response) => register_handler(request, response, ObjectDB));

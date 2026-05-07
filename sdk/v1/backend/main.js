@@ -8,6 +8,10 @@ const config = require("./lib/config.js");
 
 const router = require("./lib/router.js")
 
+const { initializeUserTable } = require('./models/user.js');
+
+initializeUserTable();
+
 const object_route = router();
 
 //Despachador principal

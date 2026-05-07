@@ -18,6 +18,6 @@ const console = require('node:console');
         }
     }
 
+    const config = load_config();
 
-
-module.exports = load_config; 
+module.exports = config; 

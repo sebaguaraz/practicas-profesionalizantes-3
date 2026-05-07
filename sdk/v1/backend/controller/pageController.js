@@ -1,10 +1,12 @@
 const { readFileSync } = require('node:fs');
 const { resolve } = require('node:path');
 
+const config = require("../lib/config.js");
+
 //* -------------- HANDLER / CONTROLLER
 
 
-function default_handler(request, response, config) {
+function default_handler(request, response) {
     try {
         const htmlPath = resolve(config.server.default_path);
         const html = readFileSync(htmlPath, 'utf-8');

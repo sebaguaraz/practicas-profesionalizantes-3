@@ -4,10 +4,12 @@ const { readFileSync } = require('node:fs');
 const register = require("../services/registerService.js");
 const login = require("../services/loginService.js");
 
+const config = require("../lib/config.js");
+
 
 //* -------------- HANDLER / CONTROLLER
 
-async function login_handler(request, response, config) {
+async function login_handler(request, response) {
     const url = new URL(request.url, 'http://' + config.server.ip);
     // * OBTENGO los datos de la URL
     const input = Object.fromEntries(url.searchParams);
@@ -21,7 +23,7 @@ async function login_handler(request, response, config) {
 }
 
 
-function register_handler(request, response, db) {
+function register_handler(request, response) {
 
     // * si el metodo de la peticion es POST accede a los datos de una forma diferente
     if (request.method == "POST") {
@@ -42,7 +44,7 @@ function register_handler(request, response, db) {
             try {
 
                 // *se los paso al metodo de LOGICA DE NEGOCIOS
-                const output = await register(objetoResultante, db);
+                const output = await register(objetoResultante);
 
                 // * creo una RESPUESTA en base a lo que me devolvio la DB
                 response.writeHead(200, { 'Content-Type': 'application/json' });

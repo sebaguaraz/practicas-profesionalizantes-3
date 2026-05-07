@@ -1,7 +1,9 @@
 //Lógica de negocio / Services (Son independientes de protocolos, comunicaciones directa a la db y servidor)
-const { insertarUsuario } = require('../database/db');
+const { insertarUsuario } = require('../models/user.js');
 
-async function register(objetoResultante, db) {
+
+
+async function register(objetoResultante) {
 
   // *DESTRUCTURACION: creo variables que almacena los valores de las propiedades del objeto
   const { username, password } = objetoResultante;
@@ -18,7 +20,7 @@ async function register(objetoResultante, db) {
   // Uso
   try {
 
-    const result = await insertarUsuario(db, username, password)
+    const result = await insertarUsuario(username, password)
     
     const {id, ...objectResult} = result
     return { 'Usuario insertado: ': objectResult };

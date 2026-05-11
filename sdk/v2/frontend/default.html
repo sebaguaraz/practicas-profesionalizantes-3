@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Login</title>
+</head>
+
+<body>
+	<!-- <h1>Registro de usuarios</h1>
+		<form action="/register" method="post">
+			<label>Usuario:</label>
+			<input name="username" type="text"><br>
+			<label>Password:</label>
+			<input type="password" name="password"><br>
+			<button type="submit">Crear usuario</button>
+		</form> -->
+</body>
+
+<script>
+
+	class FormRegisterUser extends HTMLElement {
+
+		constructor() {
+
+			super();
+			this.h3 = document.createElement("h3");
+			this.form = document.createElement("form");
+			this.label_username = document.createElement("label");
+			this.label_password = document.createElement("label");
+			this.input_username = document.createElement("input");
+			this.input_password = document.createElement("input");
+			this.br1 = document.createElement("br");
+			this.br2 = document.createElement("br");
+			this.bttn_createUser = document.createElement("button");
+
+			this.h3.textContent = "Registro de Usuario ";
+			this.label_username.textContent = "Usuario: ";
+			this.label_username.htmlFor = "username"
+			this.input_username.type = "text";
+			this.input_username.id = "username";
+			this.input_username.name = "username"
+
+			this.label_password.textContent = "Password: ";
+			this.label_password.htmlFor = "password"
+
+			this.input_password.type = "password";
+			this.input_password.id = "password"
+			this.input_password.name = "password"
+
+			this.bttn_createUser.textContent = "Registrarse"
+			this.bttn_createUser.type = "submit"
+
+			this.appendChild(this.h3);
+			this.form.appendChild(this.label_username)
+			this.form.appendChild(this.input_username)
+			this.form.appendChild(this.br1)
+			this.form.appendChild(this.label_password)
+			this.form.appendChild(this.input_password)
+			this.form.appendChild(this.br2)
+			this.form.appendChild(this.bttn_createUser)
+
+			this.appendChild(this.form)
+
+		}
+
+		async getDataForm(event) {
+
+			event.preventDefault();
+
+			//recibe un form y devuelve un objeto FormData que se llena con los campos name de los <input>
+			const formData = new FormData(this.form)
+
+			//uso el metodo FROMENTRIES() de OBJECT, recibe una lista de pares [clave, valor] y devuelve un objeto {clave: valor}.
+			const data = Object.fromEntries(formData)
+
+			await this.sendFromServer(data)
+
+
+		}
+
+		async sendFromServer(data) {
+
+			const config = {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				body: JSON.stringify(data)
+
+			}
+
+			try {
+
+				//envia los datos dentro del body en la peticion, el metodo y el formato del cuerpo body
+				// devuelve una respuesta del servidor, con propiedades y metodos
+				const response = await fetch('http://localhost:3000/register', config);
+				console.log(response)
+
+				//el metodo json transforma 
+				const result = await response.json()
+
+				if (!response.ok) {
+					throw new Error(result.message)
+					return
+				}
+
+				alert(`usuario ${result.username} con ID ${result.id} registrado con exito a la base de datos!!!`)
+				return;
+
+
+			} catch (error) {
+
+				alert(error.message)
+			}
+
+		}
+
+
+		connectedCallback() {
+
+			this.form.onsubmit = this.getDataForm.bind(this)
+		}
+
+
+
+		disconnectCallback() {
+			this.form.onsubmit = null;
+		}
+
+
+
+
+	}
+
+	class FormLoginUser extends HTMLElement {
+
+		constructor() {
+
+			super();
+			this.h3 = document.createElement("h3");
+			this.form = document.createElement("form");
+			this.label_username = document.createElement("label");
+			this.label_password = document.createElement("label");
+			this.input_username = document.createElement("input");
+			this.input_password = document.createElement("input");
+			this.br1 = document.createElement("br");
+			this.br2 = document.createElement("br");
+			this.bttn_createUser = document.createElement("button");
+
+			this.h3.textContent = "Login de Usuario ";
+			this.label_username.textContent = "Usuario: ";
+			this.label_username.htmlFor = "username"
+			this.input_username.type = "text";
+			this.input_username.id = "username";
+			this.input_username.name = "username"
+
+			this.label_password.textContent = "Password: ";
+			this.label_password.htmlFor = "password"
+
+			this.input_password.type = "password";
+			this.input_password.id = "password"
+			this.input_password.name = "password"
+
+			this.bttn_createUser.textContent = "Login"
+			this.bttn_createUser.type = "submit"
+
+			this.appendChild(this.h3);
+			this.form.appendChild(this.label_username)
+			this.form.appendChild(this.input_username)
+			this.form.appendChild(this.br1)
+			this.form.appendChild(this.label_password)
+			this.form.appendChild(this.input_password)
+			this.form.appendChild(this.br2)
+			this.form.appendChild(this.bttn_createUser)
+
+			this.appendChild(this.form)
+
+		}
+
+		async getDataForm(event) {
+
+			event.preventDefault();
+
+			//recibe un form y devuelve un objeto FormData que se llena con los campos name de los <input>
+			const formData = new FormData(this.form)
+
+			//uso el metodo FROMENTRIES() de OBJECT, recibe una lista de pares [clave, valor] y devuelve un objeto {clave: valor}.
+			const data = Object.fromEntries(formData)
+
+			await this.sendFromServer(data)
+
+
+		}
+
+		async sendFromServer(data) {
+
+			const config = {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				body: JSON.stringify(data)
+
+			}
+
+			try {
+
+				// Envía la petición al servidor y recibe un objeto (response) con el estado de la operación y el acceso al contenido.
+				const response = await fetch('http://localhost:3000/login', config);
+
+				// Lee el cuerpo de la respuesta y lo transforma de formato JSON (texto) a un objeto de JavaScript manipulable.
+				const result = await response.json()
+				console.log(result)
+
+				if (!response.ok) {
+					throw new Error(result.message)
+					return
+				}
+
+				alert(`usuario ${result.data.username} con ID ${result.data.id} logueado al sistema!!!`)
+
+
+				return;
+
+
+			} catch (error) {
+
+				alert(error.message)
+			}
+
+		}
+
+
+		connectedCallback() {
+
+			this.form.onsubmit = this.getDataForm.bind(this)
+		}
+
+
+
+		disconnectCallback() {
+			this.form.onsubmit = null;
+		}
+
+
+
+
+	}
+
+
+
+	class FormUpdateUser extends HTMLElement {
+
+		constructor() {
+
+			super();
+			this.h3 = document.createElement("h3");
+			this.form = document.createElement("form");
+			this.label_id = document.createElement("label");
+			this.label_password = document.createElement("label");
+			this.input_id = document.createElement("input");
+			this.input_password = document.createElement("input");
+			this.br1 = document.createElement("br");
+			this.br2 = document.createElement("br");
+			this.bttn_createUser = document.createElement("button");
+
+			this.h3.textContent = "Modificar Usuario ";
+			this.label_id.textContent = "Ingrese ID: ";
+			this.label_id.htmlFor = "id_user"
+			this.input_id.type = "number";
+			this.input_id.id = "id_user";
+			this.input_id.name = "id_user"
+
+			this.label_password.textContent = "Nueva Password: ";
+			this.label_password.htmlFor = "password"
+
+			this.input_password.type = "password";
+			this.input_password.id = "password"
+			this.input_password.name = "password"
+
+			this.bttn_createUser.textContent = "Modificar"
+			this.bttn_createUser.type = "submit"
+
+			this.appendChild(this.h3);
+			this.form.appendChild(this.label_id)
+			this.form.appendChild(this.input_id)
+			this.form.appendChild(this.br1)
+			this.form.appendChild(this.label_password)
+			this.form.appendChild(this.input_password)
+			this.form.appendChild(this.br2)
+			this.form.appendChild(this.bttn_createUser)
+
+			this.appendChild(this.form)
+
+		}
+
+		async getDataForm(event) {
+
+			event.preventDefault();
+
+			//recibe un form y devuelve un objeto FormData que se llena con los campos name de los <input>
+			const formData = new FormData(this.form)
+
+			//uso el metodo FROMENTRIES() de OBJECT, recibe una lista de pares [clave, valor] y devuelve un objeto {clave: valor}.
+			const data = Object.fromEntries(formData)
+
+			await this.sendFromServer(data)
+
+
+		}
+
+		async sendFromServer(data) {
+
+			const config = {
+				method: "PUT",
+				headers: { "Content-type": "application/json" },
+				body: JSON.stringify(data)
+
+			}
+
+			try {
+
+				// Envía la petición al servidor y recibe un objeto (response) con el estado de la operación y el acceso al contenido.
+				const response = await fetch('http://localhost:3000/updateUser', config);
+
+				// Lee el cuerpo de la respuesta y lo transforma de formato JSON (texto) a un objeto de JavaScript manipulable.
+				const result = await response.json()
+				console.log(result)
+
+				if (!response.ok) {
+					throw new Error(result.message)
+					return
+				}
+
+				alert(`usuario con ID ${result.id} modificado con exito!!!`)
+
+
+				return;
+
+
+			} catch (error) {
+
+				alert(error.message)
+			}
+
+		}
+
+
+		connectedCallback() {
+
+			this.form.onsubmit = this.getDataForm.bind(this)
+		}
+
+
+
+		disconnectCallback() {
+			this.form.onsubmit = null;
+		}
+
+
+
+
+	}
+
+	class FormDeleteUser extends HTMLElement {
+
+
+		constructor() {
+
+			super();
+			this.h3 = document.createElement("h3");
+			this.form = document.createElement("form");
+			this.label_id = document.createElement("label");
+			this.input_id = document.createElement("input");
+			this.br1 = document.createElement("br");
+			this.bttn_createUser = document.createElement("button");
+
+			this.h3.textContent = "Eliminar Usuario ";
+			this.label_id.textContent = "Ingrese ID: ";
+			this.label_id.htmlFor = "id_user"
+			this.input_id.type = "number";
+			this.input_id.id = "id_user";
+			this.input_id.name = "id_user"
+
+
+			this.bttn_createUser.textContent = "Eliminar"
+			this.bttn_createUser.type = "submit"
+
+			this.appendChild(this.h3);
+			this.form.appendChild(this.label_id)
+			this.form.appendChild(this.input_id)
+			this.form.appendChild(this.br1)
+			this.form.appendChild(this.bttn_createUser)
+
+			this.appendChild(this.form)
+
+		}
+
+		async getDataForm(event) {
+
+			event.preventDefault();
+
+			//recibe un form y devuelve un objeto FormData que se llena con los campos name de los <input>
+			const formData = new FormData(this.form)
+
+			//uso el metodo FROMENTRIES() de OBJECT, recibe una lista de pares [clave, valor] y devuelve un objeto {clave: valor}.
+			const data = Object.fromEntries(formData)
+
+			await this.sendFromServer(data)
+
+
+		}
+
+		async sendFromServer(data) {
+			// un objeto de configuracion de la peticion, el tipo de accion q haces (metodo), el tipo de contenido y el contenido
+			const config = {
+				method: "DELETE",
+				headers: { "Content-type": "application/json" },
+				body: JSON.stringify(data)
+
+			}
+
+			try {
+
+				// Envía la petición al servidor y devuelve un objeto (response) con el estado de la operación y metodos para acceder al contenido.
+				const response = await fetch('http://localhost:3000/deleteUser', config);
+
+				// Lee el cuerpo de la respuesta y lo transforma de formato JSON (texto) a un objeto de JavaScript manipulable.
+				const result = await response.json()
+				console.log(result)
+
+				if (!response.ok) {
+					throw new Error(result.message)
+					return
+				}
+
+				alert(`usuario con ID ${result.id} eliminado con exito!!!`)
+
+
+				return;
+
+
+			} catch (error) {
+
+				alert(error.message)
+			}
+
+		}
+
+
+		connectedCallback() {
+
+			this.form.onsubmit = this.getDataForm.bind(this)
+		}
+
+
+
+		disconnectCallback() {
+			this.form.onsubmit = null;
+		}
+
+
+
+
+	}
+
+	class FormGetAllUser extends HTMLElement {
+
+
+		constructor() {
+
+			super();
+			this.h3 = document.createElement("h3");
+			this.bttn_createUser = document.createElement("button");
+			this.table = document.createElement("table")
+			this.thead = document.createElement('thead');
+			this.tbody = document.createElement('tbody');
+
+
+			this.h3.textContent = "Obtener Usuarios ";
+
+			this.bttn_createUser.textContent = "Obtener Usuarios"
+			this.bttn_createUser.type = "submit"
+
+			this.appendChild(this.h3);
+
+			this.appendChild(this.bttn_createUser)
+
+		}
+
+		async sendFromServer() {
+			// un objeto de configuracion de la peticion, el tipo de accion q haces (metodo)
+			const config = {
+				method: "GET"
+
+			}
+
+			try {
+
+				// Envía la petición al servidor y devuelve un objeto (response) con el estado de la peticion (200-true o 400-false) y metodos para acceder al contenido.
+				const response = await fetch('http://localhost:3000/getUsersAll', config);
+
+				// Lee el cuerpo de la respuesta y lo transforma de formato JSON (texto) a un objeto de JavaScript manipulable.
+				const result = await response.json()
+				console.log(result)
+
+				if (!response.ok) {
+					throw new Error(result.message)
+					return
+				}
+
+				this.showAllUsers(result.lista)
+
+
+				return;
+
+
+			} catch (error) {
+
+				alert(error.message)
+			}
+
+		}
+
+		showAllUsers(result) {
+			this.tbody.textContent = ""
+			result.forEach((elemento) => {
+				const fila = document.createElement("tr");
+				const celdaID = document.createElement("td");
+				celdaID.textContent = elemento.id;
+				fila.appendChild(celdaID);
+
+
+				const celdaName = document.createElement("td");
+				celdaName.textContent = elemento.username
+				fila.appendChild(celdaName);
+
+				this.tbody.appendChild(fila);
+			})
+
+			this.table.appendChild(this.thead);
+			this.table.appendChild(this.tbody);
+
+			this.appendChild(this.table);
+		}
+
+		connectedCallback() {
+
+			this.bttn_createUser.onclick = this.sendFromServer.bind(this)
+		}
+
+
+
+		disconnectCallback() {
+			this.bttn_createUser.onclick = null;
+		}
+
+
+
+
+	}
+
+
+
+
+
+
+
+	class FormCreateGroup extends HTMLElement {
+
+		constructor() {
+
+			super();
+			this.h3 = document.createElement("h3");
+			this.form = document.createElement("form");
+			this.label_group = document.createElement("label");
+			this.input_group = document.createElement("input");
+			this.br1 = document.createElement("br");
+			this.bttn_group = document.createElement("button");
+
+			this.h3.textContent = "Creacion de Grupo ";
+			this.label_group.textContent = "Nombre: ";
+			this.label_group.htmlFor = "grupo"
+			this.input_group.type = "text";
+			this.input_group.id = "grupo";
+			this.input_group.name = "name"
+
+			this.bttn_group.textContent = "Crear Grupo"
+			this.bttn_group.type = "submit"
+
+			this.appendChild(this.h3);
+			this.form.appendChild(this.label_group)
+			this.form.appendChild(this.input_group)
+			this.form.appendChild(this.br1)
+			this.form.appendChild(this.bttn_group)
+
+			this.appendChild(this.form)
+
+		}
+
+		async getDataForm(event) {
+
+			event.preventDefault();
+
+			//recibe un form y devuelve un objeto FormData que se llena con los campos name de los <input>
+			const formData = new FormData(this.form)
+
+			//uso el metodo FROMENTRIES() de OBJECT, recibe una lista de pares [clave, valor] y devuelve un objeto {clave: valor}.
+			const data = Object.fromEntries(formData)
+
+			await this.sendFromServer(data)
+
+
+		}
+
+		async sendFromServer(data) {
+
+			const config = {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				body: JSON.stringify(data)
+
+			}
+
+			try {
+
+				// Envía la petición al servidor y recibe un objeto (response) con el estado de la operación y el acceso al contenido.
+				const response = await fetch('http://localhost:3000/createGroup', config);
+
+				// Lee el cuerpo de la respuesta y lo transforma de formato JSON (texto) a un objeto de JavaScript manipulable.
+				const result = await response.json()
+				console.log(result)
+
+				if (!response.ok) {
+					throw new Error(result.message)
+					return
+				}
+
+				alert(`grupo ${result.name} con ID ${result.id} creado con exito!!!`)
+				return;
+
+
+			} catch (error) {
+
+				alert(error.message)
+			}
+
+		}
+
+
+		connectedCallback() {
+
+			this.form.onsubmit = this.getDataForm.bind(this)
+		}
+
+
+
+		disconnectCallback() {
+			this.form.onsubmit = null;
+		}
+
+
+	}
+
+	class FormUpdateGroup extends HTMLElement {
+
+		constructor() {
+
+			super();
+			this.h3 = document.createElement("h3");
+			this.form = document.createElement("form");
+			this.label_name = document.createElement("label");
+			this.input_name = document.createElement("input");
+			this.label_id = document.createElement("label");
+			this.input_id = document.createElement("input");
+			this.br1 = document.createElement("br");
+			this.br2 = document.createElement("br");
+			this.bttn_group = document.createElement("button");
+
+			this.h3.textContent = "Modificar Grupo ";
+
+			this.label_id.textContent = "Ingrese ID: ";
+			this.label_id.htmlFor = "id_group"
+			this.input_id.type = "number";
+			this.input_id.id = "id_group";
+			this.input_id.name = "id_group"
+			this.label_name.textContent = "Nuevo Nombre: ";
+			this.label_name.htmlFor = "grupo"
+			this.input_name.type = "text";
+			this.input_name.id = "grupo";
+			this.input_name.name = "name"
+
+			this.bttn_group.textContent = "Modificar"
+			this.bttn_group.type = "submit"
+
+			this.appendChild(this.h3);
+			this.form.appendChild(this.label_id)
+			this.form.appendChild(this.input_id)
+			this.form.appendChild(this.br1)
+			this.form.appendChild(this.label_name)
+			this.form.appendChild(this.input_name)
+			this.form.appendChild(this.br2)
+			this.form.appendChild(this.bttn_group)
+
+			this.appendChild(this.form)
+
+		}
+
+		async getDataForm(event) {
+
+			event.preventDefault();
+
+			//recibe un form y devuelve un objeto FormData que se llena con los campos name de los <input>
+			const formData = new FormData(this.form)
+
+			//uso el metodo FROMENTRIES() de OBJECT, recibe una lista de pares [clave, valor] y devuelve un objeto {clave: valor}.
+			const data = Object.fromEntries(formData)
+
+			await this.sendFromServer(data)
+
+
+		}
+
+		async sendFromServer(data) {
+
+			const config = {
+				method: "PUT",
+				headers: { "Content-type": "application/json" },
+				body: JSON.stringify(data)
+
+			}
+
+			try {
+
+				// Envía la petición al servidor y recibe un objeto (response) con el estado de la operación y el acceso al contenido.
+				const response = await fetch('http://localhost:3000/updateGroup', config);
+
+				// Lee el cuerpo de la respuesta y lo transforma de formato JSON (texto) a un objeto de JavaScript manipulable.
+				const result = await response.json()
+				console.log(result)
+
+				if (!response.ok) {
+					throw new Error(result.message)
+					return
+				}
+
+				alert(`${result.message}`)
+				return;
+
+
+			} catch (error) {
+
+				alert(error.message)
+			}
+
+		}
+
+
+		connectedCallback() {
+
+			this.form.onsubmit = this.getDataForm.bind(this)
+		}
+
+
+
+		disconnectCallback() {
+			this.form.onsubmit = null;
+		}
+
+
+	}
+
+	class FormDeleteGroup extends HTMLElement {
+
+		constructor() {
+
+			super();
+			this.h3 = document.createElement("h3");
+			this.form = document.createElement("form");
+			this.label_id = document.createElement("label");
+			this.input_id = document.createElement("input");
+			this.br1 = document.createElement("br");
+			this.bttn_group = document.createElement("button");
+
+			this.h3.textContent = "Eliminar grupo ";
+
+			this.label_id.textContent = "Ingrese ID: ";
+			this.label_id.htmlFor = "group"
+			this.input_id.type = "number";
+			this.input_id.id = "group";
+			this.input_id.name = "id_group"
+
+			this.bttn_group.textContent = "Eliminar"
+			this.bttn_group.type = "submit"
+
+			this.appendChild(this.h3);
+			this.form.appendChild(this.label_id)
+			this.form.appendChild(this.input_id)
+			this.form.appendChild(this.br1)
+			this.form.appendChild(this.bttn_group)
+
+			this.appendChild(this.form)
+
+		}
+
+		async getDataForm(event) {
+
+			event.preventDefault();
+
+			//recibe un form y devuelve un objeto FormData que se llena con los campos name de los <input>
+			const formData = new FormData(this.form)
+
+			//uso el metodo FROMENTRIES() de OBJECT, recibe una lista de pares [clave, valor] y devuelve un objeto {clave: valor}.
+			const data = Object.fromEntries(formData)
+
+			await this.sendFromServer(data)
+
+
+		}
+
+		async sendFromServer(data) {
+
+			const config = {
+				method: "DELETE",
+				headers: { "Content-type": "application/json" },
+				body: JSON.stringify(data)
+
+			}
+
+			try {
+
+				// Envía la petición al servidor y recibe un objeto (response) con el estado de la operación y el acceso al contenido.
+				const response = await fetch('http://localhost:3000/deleteGroup', config);
+
+				// Lee el cuerpo de la respuesta y lo transforma de formato JSON (texto) a un objeto de JavaScript manipulable.
+				const result = await response.json()
+				console.log(result)
+
+				if (!response.ok) {
+					throw new Error(result.message)
+					return
+				}
+
+				alert(`${result.message}`)
+				return;
+
+
+			} catch (error) {
+
+				alert(error.message)
+			}
+
+		}
+
+
+		connectedCallback() {
+
+			this.form.onsubmit = this.getDataForm.bind(this)
+		}
+
+
+
+		disconnectCallback() {
+			this.form.onsubmit = null;
+		}
+
+
+	}
+
+	class FormGetAllGroup extends HTMLElement {
+
+		constructor() {
+
+			super();
+			this.h3 = document.createElement("h3");
+			this.bttn_group = document.createElement("button");
+
+			this.table = document.createElement("table")
+			this.thead = document.createElement('thead');
+			this.tbody = document.createElement('tbody');
+
+			this.h3.textContent = "Obtener Grupos ";
+
+			this.bttn_group.textContent = "Obtener"
+			this.bttn_group.type = "submit"
+
+			this.appendChild(this.h3);
+			this.appendChild(this.bttn_group)
+
+		}
+
+
+		async sendFromServer() {
+
+			const config = {
+				method: "GET"
+			}
+
+			try {
+
+
+				// Envía la petición al servidor y recibe un objeto (response) con el estado de la operación y el acceso al contenido.
+				const response = await fetch(`http://localhost:3000/getGroupAll`, config);
+
+				// Lee el cuerpo de la respuesta y lo transforma de formato JSON (texto) a un objeto de JavaScript manipulable.
+				const result = await response.json()
+				console.log(result)
+
+				if (!response.ok) {
+					throw new Error(result.message)
+					return
+				}
+
+				await this.showAllGroups(result.lista)
+
+			} catch (error) {
+
+				alert(error.message)
+			}
+
+		}
+
+		async showAllGroups(lista) {
+
+			this.tbody.textContent = ""
+			lista.forEach((elemento) => {
+				const fila = document.createElement("tr");
+				const celdaID = document.createElement("td");
+				celdaID.textContent = elemento.id;
+				fila.appendChild(celdaID);
+
+
+				const celdaName = document.createElement("td");
+				celdaName.textContent = elemento.name
+				fila.appendChild(celdaName);
+
+				this.tbody.appendChild(fila);
+			})
+
+			this.table.appendChild(this.thead);
+			this.table.appendChild(this.tbody);
+
+			this.appendChild(this.table);
+
+		}
+
+
+
+		connectedCallback() {
+
+			this.bttn_group.onclick = this.sendFromServer.bind(this)
+		}
+
+
+
+		disconnectCallback() {
+			this.bttn_group.onclick = null;
+		}
+
+
+	}
+
+
+
+
+	class FormCreateEndpoint extends HTMLElement {
+
+		constructor() {
+
+			super();
+			this.h3 = document.createElement("h3");
+			this.h3.textContent = "Crear Endpoint ";
+			this.form = document.createElement("form");
+			this.label_Endpoint = document.createElement("label");
+			this.input_Endpoint = document.createElement("input");
+			this.br1 = document.createElement("br");
+			this.bttn_Endpoint = document.createElement("button");
+
+			this.label_Endpoint.textContent = "Nombre: ";
+			this.label_Endpoint.htmlFor = "Endpoint"
+			this.input_Endpoint.type = "text";
+			this.input_Endpoint.id = "Endpoint";
+			this.input_Endpoint.name = "path"
+			this.bttn_Endpoint.textContent = "Crear Endpoint"
+			this.bttn_Endpoint.type = "submit"
+
+			this.appendChild(this.h3);
+			this.form.appendChild(this.label_Endpoint)
+			this.form.appendChild(this.input_Endpoint)
+			this.form.appendChild(this.br1)
+			this.form.appendChild(this.bttn_Endpoint)
+			this.appendChild(this.form)
+
+		}
+
+		getDataForm(event) {
+
+			event.preventDefault();
+
+			//recibe un form y devuelve un objeto FormData que se llena con los campos name de los <input>
+			const formData = new FormData(this.form)
+
+			//uso el metodo FROMENTRIES() de OBJECT, recibe una lista de pares [clave, valor] y devuelve un objeto {clave: valor}.
+			const data = Object.fromEntries(formData)
+
+			this.sendFromServer(data)
+		}
+
+
+		async sendFromServer(data) {
+
+			const config = {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(data)
+			}
+
+			try {
+
+
+				// Envía la petición al servidor y recibe un objeto (response) con el estado de la operación y el acceso al contenido.
+				const response = await fetch(`http://localhost:3000/createEndpoint`, config);
+
+				// Lee el cuerpo de la respuesta y lo transforma de formato JSON (texto) a un objeto de JavaScript manipulable.
+				const result = await response.json()
+				console.log(result)
+
+				if (!response.ok) {
+					throw new Error(result.message)
+					return
+				}
+
+				alert(`${result.message}`)
+
+			} catch (error) {
+
+				alert(error.message)
+			}
+
+		}
+
+
+		connectedCallback() {
+
+			this.form.onsubmit = this.getDataForm.bind(this)
+		}
+
+
+
+		disconnectCallback() {
+			this.form.onsubmit = null;
+		}
+
+
+	}
+
+
+
+	class FormCreateMember extends HTMLElement {
+
+		constructor() {
+			super();
+			this.h3 = document.createElement("h3");
+			this.form = document.createElement("form");
+			this.label_user = document.createElement("label");
+			this.label_group = document.createElement("label");
+			this.input_user = document.createElement("input");
+			this.input_group = document.createElement("input");
+			this.br1 = document.createElement("br");
+			this.br2 = document.createElement("br");
+			this.bttn_create = document.createElement("button");
+
+			this.h3.textContent = "Crear miembro";
+			this.label_user.textContent = "ID Usuario: ";
+			this.label_user.htmlFor = "id_user";
+			this.input_user.type = "number";
+			this.input_user.id = "id_user";
+			this.input_user.name = "id_user";
+
+			this.label_group.textContent = "ID Grupo: ";
+			this.label_group.htmlFor = "id_group";
+			this.input_group.type = "number";
+			this.input_group.id = "id_group";
+			this.input_group.name = "id_group";
+
+			this.bttn_create.textContent = "Crear Miembro";
+			this.bttn_create.type = "submit";
+
+			this.appendChild(this.h3);
+			this.form.appendChild(this.label_user);
+			this.form.appendChild(this.input_user);
+			this.form.appendChild(this.br1);
+			this.form.appendChild(this.label_group);
+			this.form.appendChild(this.input_group);
+			this.form.appendChild(this.br2);
+			this.form.appendChild(this.bttn_create);
+			this.appendChild(this.form);
+		}
+
+		async getDataForm(event) {
+			event.preventDefault();
+			const formData = new FormData(this.form);
+			const data = Object.fromEntries(formData);
+			await this.sendFromServer(data);
+		}
+
+		async sendFromServer(data) {
+			const config = {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				body: JSON.stringify(data)
+			};
+
+			try {
+				const response = await fetch('http://localhost:3000/createMember', config);
+				const result = await response.json();
+				if (!response.ok) {
+					throw new Error(result.message);
+				}
+				alert(`Miembro creado: ${result.message}`);
+			} catch (error) {
+				alert(error.message);
+			}
+		}
+
+		connectedCallback() {
+			this.form.onsubmit = this.getDataForm.bind(this);
+		}
+
+		disconnectedCallback() {
+			this.form.onsubmit = null;
+		}
+	}
+
+
+	customElements.define("form-register-user", FormRegisterUser);
+	customElements.define("form-login-user", FormLoginUser);
+
+	customElements.define("form-update-user", FormUpdateUser);
+	customElements.define("form-delete-user", FormDeleteUser);
+	customElements.define("form-getall-user", FormGetAllUser);
+
+	customElements.define("form-create-group", FormCreateGroup);
+	customElements.define("form-update-group", FormUpdateGroup);
+	customElements.define("form-delete-group", FormDeleteGroup);
+	customElements.define("form-getall-group", FormGetAllGroup);
+
+	customElements.define("form-create-endpoint", FormCreateEndpoint);
+
+
+	customElements.define('form-create-member', FormCreateMember);
+
+	function main() {
+		const h1_entities = document.createElement("h1");
+		h1_entities.textContent = "ABML de ENTIDADES";
+
+		const h1_autentication = document.createElement("h1");
+		h1_autentication.textContent = "Autenticacion de USUARIOS";
+
+		const h1_relations = document.createElement("h1");
+		h1_relations.textContent = "RELACIONES de Miembros y Acciones"
+
+		const formRegister = new FormRegisterUser();
+		const formLogin = new FormLoginUser();
+
+		const formUpdateUser = new FormUpdateUser();
+		const formDeleteUser = new FormDeleteUser();
+		const formgetAllUser = new FormGetAllUser();
+
+
+		const formCreateGroup = new FormCreateGroup();
+		const formUpdateGroup = new FormUpdateGroup();
+		const formDeleteGroup = new FormDeleteGroup();
+		const formGetAllGroup = new FormGetAllGroup();
+
+		const formCreateEndpoint = new FormCreateEndpoint();
+
+
+		const formCreateMember = new FormCreateMember();
+
+		document.body.appendChild(h1_autentication);
+		document.body.appendChild(formRegister);
+		document.body.appendChild(formLogin);
+
+		document.body.appendChild(h1_entities);
+		document.body.appendChild(formUpdateUser);
+		document.body.appendChild(formDeleteUser);
+		document.body.appendChild(formgetAllUser);
+
+
+		document.body.appendChild(formCreateGroup);
+		document.body.appendChild(formUpdateGroup);
+		document.body.appendChild(formDeleteGroup);
+		document.body.appendChild(formGetAllGroup);
+
+
+		document.body.appendChild(formCreateEndpoint);
+
+
+		document.body.appendChild(h1_relations);
+		document.body.appendChild(formCreateMember);
+
+
+	}
+
+	window.onload = main
+</script>
+
+</html>

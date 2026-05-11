@@ -1,0 +1,31 @@
+CREATE TABLE IF NOT EXISTS user (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL UNIQUE,
+  password TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "group" (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS members (
+  id_user INTEGER NOT NULL,
+  id_group INTEGER NOT NULL,
+  PRIMARY KEY (id_user, id_group),
+  FOREIGN KEY (id_user) REFERENCES user(id),
+  FOREIGN KEY (id_group) REFERENCES "group"(id)
+);
+
+CREATE TABLE IF NOT EXISTS endpoint (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  path TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS access (
+  id_group INTEGER NOT NULL,
+  id_endpoint INTEGER NOT NULL,
+  PRIMARY KEY (id_group, id_endpoint),
+  FOREIGN KEY (id_group) REFERENCES "group"(id),
+  FOREIGN KEY (id_endpoint) REFERENCES endpoint(id)
+);

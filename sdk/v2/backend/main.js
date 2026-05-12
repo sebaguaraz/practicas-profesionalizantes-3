@@ -12,11 +12,14 @@ const { initializeUserTable } = require('./models/user.js');
 const { initializeGroupTable } = require('./models/group.js');
 const { initializeEndpointTable } = require('./models/endpoint.js');
 const { initializeMemberTable } = require('./models/member.js');
+const {initializeAccessTable} = require("./models/access.js");
 
 initializeEndpointTable();
 initializeUserTable();
 initializeGroupTable();
 initializeMemberTable();
+initializeAccessTable();
+
 
 const object_route = router();
 

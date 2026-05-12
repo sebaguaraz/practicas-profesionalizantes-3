@@ -43,8 +43,29 @@ function insertarEndpoint(path) {
     })
 }
 
+function getEndpointById(id){
+
+    const sql = `SELECT * FROM endpoint WHERE id = ?`
+
+    return new Promise((resolve, reject) => {
+        db.get(sql, [id], function (err, row) {
+            if (err) {
+                reject(err)
+                return
+            }else if(!row){
+                resolve(null)
+                return
+            }
+
+            resolve(row)
+        })
+    })
+}
+
+
 
 module.exports = {
     initializeEndpointTable,
-    insertarEndpoint
+    insertarEndpoint,
+    getEndpointById
 }

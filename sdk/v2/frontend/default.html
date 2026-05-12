@@ -1057,6 +1057,7 @@
 
 	class FormCreateMember extends HTMLElement {
 
+
 		constructor() {
 			super();
 			this.h3 = document.createElement("h3");
@@ -1131,6 +1132,588 @@
 		}
 	}
 
+	class FormUpdateMember extends HTMLElement {
+
+		constructor() {
+			super();
+			this.h3 = document.createElement("h3");
+			this.form = document.createElement("form");
+			this.label_user = document.createElement("label");
+			this.input_user = document.createElement("input");
+			this.label_group_old = document.createElement("label");
+			this.input_group_old = document.createElement("input");
+			this.label_group_new = document.createElement("label");
+			this.input_group_new = document.createElement("input");
+			this.br1 = document.createElement("br");
+			this.br2 = document.createElement("br");
+			this.br3 = document.createElement("br");
+			this.bttn_update = document.createElement("button");
+
+			this.h3.textContent = "Modificar Miembro";
+			this.label_user.textContent = "ID Usuario: ";
+			this.label_user.htmlFor = "id_user";
+			this.input_user.type = "number";
+			this.input_user.id = "id_user";
+			this.input_user.name = "id_user";
+
+			this.label_group_old.textContent = "ID Grupo Viejo: ";
+			this.label_group_old.htmlFor = "old_id_group";
+			this.input_group_old.type = "number";
+			this.input_group_old.id = "old_id_group";
+			this.input_group_old.name = "old_id_group";
+
+			this.label_group_new.textContent = "ID Grupo Nuevo: ";
+			this.label_group_new.htmlFor = "new_id_group";
+			this.input_group_new.type = "number";
+			this.input_group_new.id = "new_id_group";
+			this.input_group_new.name = "new_id_group";
+
+
+			this.bttn_update.textContent = "Modificar";
+			this.bttn_update.type = "submit";
+
+			this.appendChild(this.h3);
+			this.form.appendChild(this.label_user);
+			this.form.appendChild(this.input_user);
+			this.form.appendChild(this.br1);
+			this.form.appendChild(this.label_group_old);
+			this.form.appendChild(this.input_group_old);
+			this.form.appendChild(this.br2);
+			this.form.appendChild(this.label_group_new);
+			this.form.appendChild(this.input_group_new);
+			this.form.appendChild(this.br3);
+			this.form.appendChild(this.bttn_update);
+			this.appendChild(this.form);
+		}
+
+		async getDataForm(event) {
+			event.preventDefault();
+			// recibe un form y devuelve un objeto FormData que se llena con los campos name de los <input>, el formatt es como un array de pares
+			const formData = new FormData(this.form);
+			// uso el metodo FROMENTRIES() de OBJECT, recibe una lista de pares [clave, valor] y devuelve un objeto {clave: valor}.
+			const data = Object.fromEntries(formData);
+			await this.sendFromServer(data);
+		}
+
+		async sendFromServer(data) {
+			const config = {
+				method: "PUT",
+				headers: { "Content-type": "application/json" },
+				body: JSON.stringify(data)
+			};
+
+			try {
+				const response = await fetch('http://localhost:3000/updateMember', config);
+				const result = await response.json();
+				if (!response.ok) {
+					throw new Error(result.message);
+				}
+				alert(`${result.message}`);
+			} catch (error) {
+				alert(error.message);
+			}
+		}
+
+		connectedCallback() {
+			this.form.onsubmit = this.getDataForm.bind(this);
+		}
+
+		disconnectedCallback() {
+			this.form.onsubmit = null;
+		}
+	}
+
+	class FormGetAllMember extends HTMLElement {
+
+		constructor() {
+			super();
+			this.h3 = document.createElement("h3");
+
+			this.table = document.createElement("table");
+			this.thead = document.createElement("thead");
+			this.tbody = document.createElement("tbody");
+			this.bttn_getAll = document.createElement("button");
+
+			this.h3.textContent = "Obtener Miembros";
+
+			this.bttn_getAll.textContent = "Obtener";
+			this.bttn_getAll.type = "submit";
+
+			this.appendChild(this.h3);
+			this.appendChild(this.bttn_getAll);
+		}
+
+		async sendFromServer() {
+			const config = {
+				method: "GET"
+			};
+
+			try {
+				const response = await fetch('http://localhost:3000/getMemberAll', config);
+				const result = await response.json();
+				if (!response.ok) {
+					throw new Error(result.message);
+				}
+
+				this.showAllMembers(result.lista);
+			} catch (error) {
+				alert(error.message);
+			}
+		}
+
+		showAllMembers(list) {
+			this.tbody.textContent = "";
+
+			const headerRow = document.createElement("tr");
+			const thUser = document.createElement("th");
+			const thGroup = document.createElement("th");
+			thUser.textContent = "ID Usuario";
+			thGroup.textContent = "ID Grupo";
+			headerRow.appendChild(thUser);
+			headerRow.appendChild(thGroup);
+
+			this.thead.textContent = "";
+			this.thead.appendChild(headerRow);
+
+			list.forEach((item) => {
+				const fila = document.createElement("tr");
+
+				const celdaUser = document.createElement("td");
+				celdaUser.textContent = item.id_user;
+				fila.appendChild(celdaUser);
+
+				const celdaGroup = document.createElement("td");
+				celdaGroup.textContent = item.id_group;
+				fila.appendChild(celdaGroup);
+
+				this.tbody.appendChild(fila);
+			});
+
+			this.table.textContent = "";
+			this.table.appendChild(this.thead);
+			this.table.appendChild(this.tbody);
+			this.appendChild(this.table);
+		}
+
+		connectedCallback() {
+			this.bttn_getAll.onclick = this.sendFromServer.bind(this);
+		}
+
+		disconnectedCallback() {
+			this.bttn_getAll.onclick = null;
+		}
+	}
+
+	class FormDeleteMember extends HTMLElement {
+
+		constructor() {
+			super();
+			this.h3 = document.createElement("h3");
+			this.form = document.createElement("form");
+			this.label_user = document.createElement("label");
+			this.input_user = document.createElement("input");
+			this.label_group = document.createElement("label");
+			this.input_group = document.createElement("input");
+			this.br1 = document.createElement("br");
+			this.br2 = document.createElement("br");
+			this.bttn_delete = document.createElement("button");
+
+			this.h3.textContent = "Eliminar Miembro";
+			this.label_user.textContent = "ID Usuario: ";
+			this.label_user.htmlFor = "id_user";
+			this.input_user.type = "number";
+			this.input_user.id = "id_user";
+			this.input_user.name = "id_user";
+
+			this.label_group.textContent = "ID Grupo: ";
+			this.label_group.htmlFor = "id_group";
+			this.input_group.type = "number";
+			this.input_group.id = "id_group";
+			this.input_group.name = "id_group";
+
+			this.bttn_delete.textContent = "Eliminar";
+			this.bttn_delete.type = "submit";
+
+			this.appendChild(this.h3);
+			this.form.appendChild(this.label_user);
+			this.form.appendChild(this.input_user);
+			this.form.appendChild(this.br1);
+			this.form.appendChild(this.label_group);
+			this.form.appendChild(this.input_group);
+			this.form.appendChild(this.br2);
+			this.form.appendChild(this.bttn_delete);
+			this.appendChild(this.form);
+		}
+
+		async getDataForm(event) {
+			event.preventDefault();
+			// recibe un form y devuelve un objeto FormData que se llena con los campos name de los <input>, el formatt es como un array de pares
+			const formData = new FormData(this.form);
+			// uso el metodo FROMENTRIES() de OBJECT, recibe una lista de pares [clave, valor] y devuelve un objeto {clave: valor}.
+			const data = Object.fromEntries(formData);
+			await this.sendFromServer(data);
+		}
+
+		async sendFromServer(data) {
+			const config = {
+				method: "DELETE",
+				headers: { "Content-type": "application/json" },
+				body: JSON.stringify(data)
+			};
+
+			try {
+				const response = await fetch('http://localhost:3000/deleteMember', config);
+				const result = await response.json();
+				if (!response.ok) {
+					throw new Error(result.message);
+				}
+				alert(`${result.message}`);
+			} catch (error) {
+				alert(error.message);
+			}
+		}
+
+		connectedCallback() {
+			this.form.onsubmit = this.getDataForm.bind(this);
+		}
+
+		disconnectedCallback() {
+			this.form.onsubmit = null;
+		}
+	}
+
+
+
+	class FormCreateAccess extends HTMLElement {
+
+
+		constructor() {
+			super();
+			this.h3 = document.createElement("h3");
+			this.form = document.createElement("form");
+			this.label_endpoint = document.createElement("label");
+			this.label_group = document.createElement("label");
+			this.input_endpoint = document.createElement("input");
+			this.input_group = document.createElement("input");
+			this.br1 = document.createElement("br");
+			this.br2 = document.createElement("br");
+			this.bttn_create = document.createElement("button");
+
+			this.h3.textContent = "Crear Acceso";
+			this.label_endpoint.textContent = "ID Endpoint: ";
+			this.label_endpoint.htmlFor = "id_endpoint";
+			this.input_endpoint.type = "number";
+			this.input_endpoint.id = "id_endpoint";
+			this.input_endpoint.name = "id_endpoint";
+
+			this.label_group.textContent = "ID Grupo: ";
+			this.label_group.htmlFor = "id_group";
+			this.input_group.type = "number";
+			this.input_group.id = "id_group";
+			this.input_group.name = "id_group";
+
+			this.bttn_create.textContent = "Crear";
+			this.bttn_create.type = "submit";
+
+			this.appendChild(this.h3);
+			this.form.appendChild(this.label_endpoint);
+			this.form.appendChild(this.input_endpoint);
+			this.form.appendChild(this.br1);
+			this.form.appendChild(this.label_group);
+			this.form.appendChild(this.input_group);
+			this.form.appendChild(this.br2);
+			this.form.appendChild(this.bttn_create);
+			this.appendChild(this.form);
+		}
+
+		async getDataForm(event) {
+			event.preventDefault();
+			const formData = new FormData(this.form);
+			const data = Object.fromEntries(formData);
+			await this.sendFromServer(data);
+		}
+
+		async sendFromServer(data) {
+			const config = {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				body: JSON.stringify(data)
+			};
+
+			try {
+				const response = await fetch('http://localhost:3000/createAccess', config);
+				const result = await response.json();
+				if (!response.ok) {
+					throw new Error(result.message);
+				}
+				alert(`${result.message}`);
+			} catch (error) {
+				alert(error.message);
+			}
+		}
+
+		connectedCallback() {
+			this.form.onsubmit = this.getDataForm.bind(this);
+		}
+
+		disconnectedCallback() {
+			this.form.onsubmit = null;
+		}
+	}
+
+	class FormUpdateAccess extends HTMLElement {
+		constructor() {
+			super();
+			this.h3 = document.createElement("h3");
+			this.form = document.createElement("form");
+			this.label_endpoint_new = document.createElement("label");
+			this.label_endpoint_old = document.createElement("label");
+			this.label_group = document.createElement("label");
+			this.input_endpoint_new = document.createElement("input");
+			this.input_endpoint_old = document.createElement("input");
+			this.input_group = document.createElement("input");
+			this.br1 = document.createElement("br");
+			this.br2 = document.createElement("br");
+			this.br3 = document.createElement("br");
+			this.bttn_create = document.createElement("button");
+
+			this.h3.textContent = "Modificar Acceso";
+			this.label_endpoint_new.textContent = "ID Endpoint Nuevo: ";
+			this.label_endpoint_new.htmlFor = "id_endpoint_new";
+			this.input_endpoint_new.type = "number";
+			this.input_endpoint_new.id = "id_endpoint_new";
+			this.input_endpoint_new.name = "id_endpoint_new";
+
+			this.label_endpoint_old.textContent = "ID Endpoint Viejo: ";
+			this.label_endpoint_old.htmlFor = "id_endpoint_old";
+			this.input_endpoint_old.type = "number";
+			this.input_endpoint_old.id = "id_endpoint_old";
+			this.input_endpoint_old.name = "id_endpoint_old";
+
+			this.label_group.textContent = "ID Grupo: ";
+			this.label_group.htmlFor = "id_group";
+			this.input_group.type = "number";
+			this.input_group.id = "id_group";
+			this.input_group.name = "id_group";
+
+			this.bttn_create.textContent = "Modificar";
+			this.bttn_create.type = "submit";
+
+			this.appendChild(this.h3);
+			this.form.appendChild(this.label_endpoint_new);
+			this.form.appendChild(this.input_endpoint_new);
+			this.form.appendChild(this.br1);
+			this.form.appendChild(this.label_group);
+			this.form.appendChild(this.input_group);
+			this.form.appendChild(this.br2);
+			this.form.appendChild(this.label_endpoint_old);
+			this.form.appendChild(this.input_endpoint_old);
+			this.form.appendChild(this.br3);
+			this.form.appendChild(this.bttn_create);
+			this.appendChild(this.form);
+		}
+
+		async getDataForm(event) {
+			event.preventDefault();
+			const formData = new FormData(this.form);
+			const data = Object.fromEntries(formData);
+			await this.sendFromServer(data);
+		}
+
+		async sendFromServer(data) {
+			const config = {
+				method: "PUT",
+				headers: { "Content-type": "application/json" },
+				body: JSON.stringify(data)
+			};
+
+			try {
+				const response = await fetch('http://localhost:3000/updateAccess', config);
+				const result = await response.json();
+				if (!response.ok) {
+					throw new Error(result.message);
+				}
+				alert(`${result.message}`);
+			} catch (error) {
+				alert(error.message);
+			}
+		}
+
+		connectedCallback() {
+			this.form.onsubmit = this.getDataForm.bind(this);
+		}
+
+		disconnectedCallback() {
+			this.form.onsubmit = null;
+		}
+	}
+
+	class FormGetAllAccess extends HTMLElement {
+
+		constructor() {
+			super();
+			this.h3 = document.createElement("h3");
+
+			this.table = document.createElement("table");
+			this.thead = document.createElement("thead");
+			this.tbody = document.createElement("tbody");
+			this.bttn_getAll = document.createElement("button");
+
+			this.h3.textContent = "Obtener Accesos";
+
+			this.bttn_getAll.textContent = "Obtener";
+			this.bttn_getAll.type = "submit";
+
+			this.appendChild(this.h3);
+			this.appendChild(this.bttn_getAll);
+		}
+
+		async sendFromServer() {
+			const config = {
+				method: "GET"
+			};
+
+			try {
+				const response = await fetch('http://localhost:3000/getAccessAll', config);
+				const result = await response.json();
+				if (!response.ok) {
+					throw new Error(result.message);
+				}
+
+				this.showAllMembers(result.lista);
+			} catch (error) {
+				alert(error.message);
+			}
+		}
+
+		showAllMembers(list) {
+
+			if (list.lenght == 0) {
+				alert(list.message);
+				return
+			}
+
+
+			this.tbody.textContent = "";
+
+			const headerRow = document.createElement("tr");
+			const thUEndpoint = document.createElement("th");
+			const thGroup = document.createElement("th");
+			thUEndpoint.textContent = "ID Endpoint";
+			thGroup.textContent = "ID Grupo";
+			headerRow.appendChild(thUEndpoint);
+			headerRow.appendChild(thGroup);
+
+			this.thead.textContent = "";
+			this.thead.appendChild(headerRow);
+
+			list.forEach((item) => {
+				const fila = document.createElement("tr");
+
+				const celdaEndpoint = document.createElement("td");
+				celdaEndpoint.textContent = item.id_endpoint;
+				fila.appendChild(celdaEndpoint);
+
+				const celdaGroup = document.createElement("td");
+				celdaGroup.textContent = item.id_group;
+				fila.appendChild(celdaGroup);
+
+				this.tbody.appendChild(fila);
+			});
+
+			this.table.textContent = "";
+			this.table.appendChild(this.thead);
+			this.table.appendChild(this.tbody);
+			this.appendChild(this.table);
+		}
+
+		connectedCallback() {
+			this.bttn_getAll.onclick = this.sendFromServer.bind(this);
+		}
+
+		disconnectedCallback() {
+			this.bttn_getAll.onclick = null;
+		}
+	}
+
+	class FormDeleteAccess extends HTMLElement {
+
+		constructor() {
+			super();
+			this.h3 = document.createElement("h3");
+			this.form = document.createElement("form");
+			this.label_endpoint = document.createElement("label");
+			this.input_endpoint = document.createElement("input");
+			this.label_group = document.createElement("label");
+			this.input_group = document.createElement("input");
+			this.br1 = document.createElement("br");
+			this.br2 = document.createElement("br");
+			this.bttn_delete = document.createElement("button");
+
+			this.h3.textContent = "Eliminar Acceso";
+			this.label_endpoint.textContent = "ID Endpoint: ";
+			this.label_endpoint.htmlFor = "id_endpoint";
+			this.input_endpoint.type = "number";
+			this.input_endpoint.id = "id_endpoint";
+			this.input_endpoint.name = "id_endpoint";
+
+			this.label_group.textContent = "ID Grupo: ";
+			this.label_group.htmlFor = "id_group";
+			this.input_group.type = "number";
+			this.input_group.id = "id_group";
+			this.input_group.name = "id_group";
+
+			this.bttn_delete.textContent = "Eliminar";
+			this.bttn_delete.type = "submit";
+
+			this.appendChild(this.h3);
+			this.form.appendChild(this.label_endpoint);
+			this.form.appendChild(this.input_endpoint);
+			this.form.appendChild(this.br1);
+			this.form.appendChild(this.label_group);
+			this.form.appendChild(this.input_group);
+			this.form.appendChild(this.br2);
+			this.form.appendChild(this.bttn_delete);
+			this.appendChild(this.form);
+		}
+
+		async getDataForm(event) {
+			event.preventDefault();
+			// recibe un form y devuelve un objeto FormData que se llena con los campos name de los <input>, el formatt es como un array de pares
+			const formData = new FormData(this.form);
+			// uso el metodo FROMENTRIES() de OBJECT, recibe una lista de pares [clave, valor] y devuelve un objeto {clave: valor}.
+			const data = Object.fromEntries(formData);
+			await this.sendFromServer(data);
+		}
+
+		async sendFromServer(data) {
+			const config = {
+				method: "DELETE",
+				headers: { "Content-type": "application/json" },
+				body: JSON.stringify(data)
+			};
+
+			try {
+				const response = await fetch('http://localhost:3000/deleteAccess', config);
+				const result = await response.json();
+				if (!response.ok) {
+					throw new Error(result.message);
+				}
+				alert(`${result.message}`);
+			} catch (error) {
+				alert(error.message);
+			}
+		}
+
+		connectedCallback() {
+			this.form.onsubmit = this.getDataForm.bind(this);
+		}
+
+		disconnectedCallback() {
+			this.form.onsubmit = null;
+		}
+	}
+
 
 	customElements.define("form-register-user", FormRegisterUser);
 	customElements.define("form-login-user", FormLoginUser);
@@ -1148,6 +1731,15 @@
 
 
 	customElements.define('form-create-member', FormCreateMember);
+	customElements.define('form-update-member', FormUpdateMember);
+	customElements.define('form-delete-member', FormDeleteMember);
+	customElements.define('form-getall-member', FormGetAllMember);
+
+
+	customElements.define('form-create-access', FormCreateAccess);
+	customElements.define('form-update-access', FormUpdateAccess);
+	customElements.define('form-delete-access', FormDeleteAccess);
+	customElements.define('form-getall-access', FormGetAllAccess);
 
 	function main() {
 		const h1_entities = document.createElement("h1");
@@ -1176,6 +1768,16 @@
 
 
 		const formCreateMember = new FormCreateMember();
+		const formUpdateMember = new FormUpdateMember();
+		const formDeleteMember = new FormDeleteMember();
+		const formGetAllMember = new FormGetAllMember();
+
+
+
+		const formCreateAccess = new FormCreateAccess();
+		const formUpdateAccess = new FormUpdateAccess();
+		const formGetAllAccess = new FormGetAllAccess();
+		const formDeleteAccess = new FormDeleteAccess();
 
 		document.body.appendChild(h1_autentication);
 		document.body.appendChild(formRegister);
@@ -1198,7 +1800,15 @@
 
 		document.body.appendChild(h1_relations);
 		document.body.appendChild(formCreateMember);
+		document.body.appendChild(formUpdateMember);
+		document.body.appendChild(formDeleteMember);
+		document.body.appendChild(formGetAllMember);
 
+
+		document.body.appendChild(formCreateAccess);
+		document.body.appendChild(formUpdateAccess);
+		document.body.appendChild(formGetAllAccess);
+		document.body.appendChild(formDeleteAccess);
 
 	}
 

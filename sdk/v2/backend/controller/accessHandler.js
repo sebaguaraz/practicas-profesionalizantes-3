@@ -1,39 +1,8 @@
-const {createMember, updateMember, getMembers, deleteMember} = require("../services/memberService");
+const { createAccess, updateAccess, getAllAccess, deleteAccess } = require("../services/accessService.js");
 
-async function createMember_handler(request, response){
+async function createAccess_handler(request, response) {
 
-    if(request.method === "POST"){
-
-        let bodyComplete = "";
-
-        // * obtengo los datos del body
-        request.on("data", (paquete) => {
-            bodyComplete += paquete.toString();
-        })
-
-        request.on("end", async () => {
-            try {
-                const objetoResultante = JSON.parse(bodyComplete);
-
-                // *se los paso al metodo de LOGICA DE NEGOCIOS
-                const output = await createMember(objetoResultante);
-
-                // * creo una RESPUESTA en base a lo que me devolvio la DB
-                response.writeHead(output.status, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(output));
-
-            } catch (error) {
-
-                response.writeHead(500, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(error.message));
-            }
-        })
-    }
-}
-
-async function updateMember_handler(request, response){
-
-    if(request.method === "PUT"){
+    if (request.method === "POST") {
 
         let bodyComplete = "";
 
@@ -43,28 +12,30 @@ async function updateMember_handler(request, response){
         })
 
         request.on("end", async () => {
+            const objetoResultante = JSON.parse(bodyComplete)
+
             try {
-                const objetoResultante = JSON.parse(bodyComplete);
 
                 // *se los paso al metodo de LOGICA DE NEGOCIOS
-                const output = await updateMember(objetoResultante);
+                const output = await createAccess(objetoResultante);
 
                 // * creo una RESPUESTA en base a lo que me devolvio la DB
                 response.writeHead(output.status, { 'Content-Type': 'application/json' });
                 response.end(JSON.stringify(output));
 
             } catch (error) {
-
                 response.writeHead(500, { 'Content-Type': 'application/json' });
                 response.end(JSON.stringify(error.message));
             }
         })
     }
+
 }
 
-async function deleteMember_handler(request, response){
 
-    if(request.method === "DELETE"){
+async function updateAccess_handler(request, response) {
+
+    if (request.method == "PUT") {
 
         let bodyComplete = "";
 
@@ -74,18 +45,18 @@ async function deleteMember_handler(request, response){
         })
 
         request.on("end", async () => {
+            const objetoResultante = JSON.parse(bodyComplete)
+
             try {
-                const objetoResultante = JSON.parse(bodyComplete);
 
                 // *se los paso al metodo de LOGICA DE NEGOCIOS
-                const output = await deleteMember(objetoResultante);
+                const output = await updateAccess(objetoResultante);
 
                 // * creo una RESPUESTA en base a lo que me devolvio la DB
                 response.writeHead(output.status, { 'Content-Type': 'application/json' });
                 response.end(JSON.stringify(output));
 
             } catch (error) {
-
                 response.writeHead(500, { 'Content-Type': 'application/json' });
                 response.end(JSON.stringify(error.message));
             }
@@ -93,20 +64,21 @@ async function deleteMember_handler(request, response){
     }
 }
 
-async function getMembers_handler(request, response){
 
-    if(request.method == "GET"){
+async function getAccessAll_handler(request, response) {
+
+    if (request.method === "GET") {
 
         try {
 
-            const output = await getMembers();
+            // *se los paso al metodo de LOGICA DE NEGOCIOS
+            const output = await getAllAccess();
 
             // * creo una RESPUESTA en base a lo que me devolvio la DB
             response.writeHead(output.status, { 'Content-Type': 'application/json' });
             response.end(JSON.stringify(output));
 
         } catch (error) {
-
             response.writeHead(500, { 'Content-Type': 'application/json' });
             response.end(JSON.stringify(error.message));
         }
@@ -114,10 +86,41 @@ async function getMembers_handler(request, response){
 }
 
 
+async function deleteAccess_handler(request, response) {
 
-module.exports = {
-    createMember_handler,
-    updateMember_handler,
-    deleteMember_handler,
-    getMembers_handler
+    if (request.method === "DELETE") {
+
+        let bodyComplete = "";  // * obtengo los datos del body
+
+        request.on("data", (paquete) => {
+            bodyComplete += paquete.toString();
+        })
+
+        request.on("end", async () => {
+            const objetoResultante = JSON.parse(bodyComplete)
+
+            try {
+
+                // *se los paso al metodo de LOGICA DE NEGOCIOS
+                const output = await deleteAccess(objetoResultante);
+
+                // * creo una RESPUESTA en base a lo que me devolvio la DB
+                response.writeHead(output.status, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify(output));
+
+            } catch (error) {
+                response.writeHead(500, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify(error.message));
+            }
+        })
+    }
 }
+
+
+
+
+
+
+
+
+module.exports = { createAccess_handler, updateAccess_handler, getAccessAll_handler, deleteAccess_handler }

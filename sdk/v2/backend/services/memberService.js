@@ -1,5 +1,7 @@
 const {crearMiembro, modificarMiembro, obtenerMiembros, eliminarMiembro} = require("../models/member")
 
+const {getGroupById} = require("../models/group")
+
 async function createMember(objetoResultante){
 
     const {id_group, id_user} = objetoResultante
@@ -20,12 +22,18 @@ async function createMember(objetoResultante){
 async function updateMember(objetoResultante){
     const {old_id_group, new_id_group, id_user} = objetoResultante
 
-    if(!id_group || !id_user || !new_id_group){
+    if(!old_id_group || !id_user || !new_id_group){
         return {status: 400, message: "Campos obligatorios"}
     }
 
     try{
-        const result = await modificarMiembro(id_user, old_id_group, new_id_group)
+
+        const existsNewGroup = await getGroupById(new_id_group)
+        if(!existsNewGroup){
+            return {status: 400, message: "Grupo Nuevo no encontrado"}
+        }
+
+        const result = await modificarMiembro(id_user, old_id_group, existsNewGroup.id)
 
         if(!result){
             return {status: 400, message: "Miembro no encontrado"}

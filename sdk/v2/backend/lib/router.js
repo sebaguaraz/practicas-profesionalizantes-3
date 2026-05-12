@@ -12,10 +12,11 @@ const { updateUser_handler, deleteUser_handler, getUsersAll_handler } = require(
 // * importamos modulos endpoint
 const { createEndpoint_handler } = require("../controller/endpointHandler");
 
-
 // * importamos modulos miembros
 const { createMember_handler, updateMember_handler, deleteMember_handler, getMembers_handler } = require("../controller/memberHandler");
 
+// * importamos modulos accesos
+const { createAccess_handler, updateAccess_handler, getAccessAll_handler, deleteAccess_handler } = require("../controller/accessHandler");
 
 function route() {
 
@@ -50,6 +51,12 @@ function route() {
     router.set("/updateMember", (request, response) => updateMember_handler(request, response));
     router.set("/deleteMember", (request, response) => deleteMember_handler(request, response));
     router.set("/getMemberAll", (request, response) => getMembers_handler(request, response));
+    
+    // * rutas de accesos
+    router.set("/createAccess", (request, response) => createAccess_handler(request, response));
+    router.set("/updateAccess", (request, response) => updateAccess_handler(request, response));
+    router.set("/getAccessAll", (request, response) => getAccessAll_handler(request, response));
+    router.set("/deleteAccess", (request, response) => deleteAccess_handler(request, response));
 
     return router;
 

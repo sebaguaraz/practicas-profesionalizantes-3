@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Login</title>
+</head>
+
+<body>
+	<p id="result"></p>
+
+	<h1>Login de usuarios</h1>
+	<form id="form-login">
+		<label>Usuario:</label>
+		<input name="username" required><br>
+		<label>Password:</label>
+		<input type="password" name="password" required><br>
+		<button type="submit">Logear usuario</button>
+	</form>
+
+	<h2>Logout </h2>
+	<form id="form-logout">
+		<label>Usuario:</label>
+		<input name="username" required><br>
+		<label>Password:</label>
+		<input name="password" required placeholder="###"><br>
+		<button type="submit">cerrar sesion</button>
+	</form>
+
+	<h2>Acciones</h2>
+	<button id="btnGetLog" type="submit">Get Log</button>
+	<button id="btnGetHello" type="submit">Get sayHello</button>
+
+</body>
+
+<script>
+
+	const span = document.getElementById('result');
+	const form_login = document.getElementById('form-login');
+	const form_logout = document.getElementById('form-logout');
+
+	const btnGetLog = document.getElementById('btnGetLog');
+	const btnGetHello = document.getElementById('btnGetHello');
+
+	let sessionExist = null
+
+	function getDataLogin(event) {
+		event.preventDefault()
+		const formdata = new FormData(form_login)
+		const data = Object.fromEntries(formdata);
+		sendfromServer(data);
+
+	}
+
+	async function sendfromServer(data) {
+
+		try {
+			let object_config = {
+
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(data)
+			}
+
+			const response = await fetch("/login", object_config)
+
+			const result = await response.json()
+
+			if (!response.ok) {
+
+				throw new Error(result.error || result.message)
+
+			}
+			span.textContent = result.message
+			sessionExist = result.session.name
+			console.log(result)
+		} catch (error) {
+
+			result.textContent = error.message
+		}
+
+
+	}
+
+
+	function getDataLogout(event) {
+		event.preventDefault()
+		const formdata = new FormData(form_logout)
+		const data = Object.fromEntries(formdata);
+		sendfromServer2(data);
+
+	}
+
+	async function sendfromServer2(data) {
+
+
+		try {
+			let object_config = {
+
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(data)
+
+			}
+			const response = await fetch("/logout", object_config)
+
+			const result = await response.json()
+
+			if (!response.ok) {
+
+				throw new Error(result.message)
+
+			}
+			span.textContent = result.message
+			return
+		} catch (error) {
+			span.textContent = error.message
+		}
+
+
+	}
+
+	async function getLog_handler(event) {
+		event.preventDefault()
+
+		const config = {
+			method: "GET"
+		}
+
+		try {
+
+			const response = await fetch(`/log?username=${sessionExist}`, config)
+			const result = await response.json()
+			if (!response.ok) {
+				throw new Error(result.message || result.error)
+			}
+
+			span.textContent = result.message
+
+
+		} catch (error) {
+			console.log(sessionExist)
+
+			span.textContent = error.message
+		}
+	}
+
+
+	async function getHello_handler(event) {
+		event.preventDefault()
+
+		const config = {
+			method: "GET"
+		}
+
+		try {
+
+			const response = await fetch(`/sayHello?username=${sessionExist}`, config)
+			const result = await response.json()
+			if (!response.ok) {
+				throw new Error(result.message || result.error)
+			}
+			span.textContent = result.message
+
+
+		} catch (error) {
+			console.log(sessionExist)
+
+			span.textContent = error.message
+		}
+	}
+
+
+	function main() {
+		form_login.onsubmit = getDataLogin;
+		form_logout.onsubmit = getDataLogout;
+
+		btnGetLog.onclick = getLog_handler;
+		btnGetHello.onclick = getHello_handler;
+	}
+
+	window.onload = main;
+
+</script>
+
+</html>

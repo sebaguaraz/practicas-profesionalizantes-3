@@ -1,23 +1,27 @@
 const console = require('node:console');
-const { getUserById, updateUser, deleteUser, getUsersAll } = require("../models/user.js");
+const { GetUserByNameDB,
+    GetUserByIdDB,
+    GetUsersAllDB,
+    UpdateUserDB,
+    DeleteUserDB } = require("../models/user.js");
 
 
-async function updateUser_Service(objetoResultante) {
+async function updateUser(dataUser) {
 
-    const { id_user, password, } = objetoResultante
+    const { id_user, password, } = dataUser
 
     if (!id_user || !password) {
         return { status: 400, message: "El id y contraseña son campos obligatorios" }
     }
 
     try {
-        const userExists = await getUserById(id_user);
+        const userExists = await GetUserByIdDB(id_user);
 
         if (!userExists) {
             return { status: 400, message: "El usuario no existe" }
         }
 
-        const result = await updateUser(userExists.id, password.trim());
+        const result = await UpdateUserDB(userExists.id, password.trim());
         if (!result) {
             return { status: 400, message: "El usuario no pudo ser modificado" }
         }
@@ -31,9 +35,9 @@ async function updateUser_Service(objetoResultante) {
 
 }
 
-async function deleteUser_Service(objetoResultante) {
+async function deleteUser(dataUser) {
 
-    const { id_user } = objetoResultante
+    const { id_user } = dataUser
 
     if (!id_user) {
         return { status: 400, message: "El id es un campo obligatorio" }
@@ -41,7 +45,7 @@ async function deleteUser_Service(objetoResultante) {
 
     try {
 
-        const userExists = await getUserById(id_user);
+        const userExists = await GetUserByIdDB(id_user);
 
         if (!userExists) {
             return { status: 400, message: "El usuario no existe" }
@@ -49,7 +53,7 @@ async function deleteUser_Service(objetoResultante) {
 
         const id = userExists.id;
 
-        const result = await deleteUser(id)
+        const result = await DeleteUserDB(id)
 
         if (!result) {
             return { status: 400, message: "El usuario no pudo ser eliminado" }
@@ -64,11 +68,11 @@ async function deleteUser_Service(objetoResultante) {
 }
 
 
-async function getUsersAll_Service() {
+async function getUsersAll() {
 
     try {
 
-        const result = await getUsersAll();
+        const result = await GetUsersAllDB();
 
         if (!result) {
             return { status: 400, message: "No existen usuarios" };
@@ -88,4 +92,4 @@ async function getUsersAll_Service() {
 
 
 
-module.exports = { updateUser_Service, deleteUser_Service, getUsersAll_Service }
+module.exports = { updateUser, deleteUser, getUsersAll }

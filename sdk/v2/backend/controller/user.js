@@ -1,8 +1,7 @@
 const console = require('node:console');
-const { updateUser_Service, deleteUser_Service, getUsersAll_Service } = require("../services/userService.js");
+const { updateUser, deleteUser, getUsersAll } = require("../services/user.js");
 
-
-async function updateUser_handler(request, response) {
+async function UpdateUser(request, response) {
 
     if (request.method == "PUT") {
 
@@ -14,12 +13,12 @@ async function updateUser_handler(request, response) {
         })
 
         request.on("end", async () => {
-            const objetoResultante = JSON.parse(bodyComplete)
+            const dataUser = JSON.parse(bodyComplete)
 
             try {
 
                 // *se los paso al metodo de LOGICA DE NEGOCIOS
-                const output = await updateUser_Service(objetoResultante);
+                const output = await updateUser(dataUser);
 
                 // * creo una RESPUESTA en base a lo que me devolvio la DB
                 response.writeHead(output.status, { 'Content-Type': 'application/json' });
@@ -29,7 +28,7 @@ async function updateUser_handler(request, response) {
             } catch (error) {
 
                 response.writeHead(500, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(error.message));
+                response.end(JSON.stringify({message: error.message}));
             }
 
 
@@ -40,7 +39,7 @@ async function updateUser_handler(request, response) {
     }
 }
 
-async function deleteUser_handler(request, response) {
+async function DeleteUser(request, response) {
 
     if (request.method == "DELETE") {
 
@@ -52,12 +51,12 @@ async function deleteUser_handler(request, response) {
         })
 
         request.on("end", async () => {
-            const objetoResultante = JSON.parse(bodyComplete)
+            const dataUser = JSON.parse(bodyComplete)
 
             try {
 
                 // *se los paso al metodo de LOGICA DE NEGOCIOS
-                const output = await deleteUser_Service(objetoResultante);
+                const output = await deleteUser(dataUser);
 
                 // * creo una RESPUESTA en base a lo que me devolvio la DB
                 response.writeHead(output.status, { 'Content-Type': 'application/json' });
@@ -67,7 +66,7 @@ async function deleteUser_handler(request, response) {
             } catch (error) {
 
                 response.writeHead(500, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(error.message));
+                response.end(JSON.stringify({message: error.message}));
             }
 
 
@@ -78,7 +77,7 @@ async function deleteUser_handler(request, response) {
     }
 }
 
-async function getUsersAll_handler(request, response) {
+async function GetUsersAll(request, response) {
 
     if (request.method == "GET") {
 
@@ -86,7 +85,7 @@ async function getUsersAll_handler(request, response) {
         try {
 
             // *se los paso al metodo de LOGICA DE NEGOCIOS
-            const output = await getUsersAll_Service();
+            const output = await getUsersAll();
 
             // * creo una RESPUESTA en base a lo que me devolvio la DB
             response.writeHead(output.status, { 'Content-Type': 'application/json' });
@@ -96,7 +95,7 @@ async function getUsersAll_handler(request, response) {
         } catch (error) {
 
             response.writeHead(500, { 'Content-Type': 'application/json' });
-            response.end(JSON.stringify(error.message));
+            response.end(JSON.stringify({message: error.message}));
         }
 
 
@@ -105,4 +104,4 @@ async function getUsersAll_handler(request, response) {
 
 
 
-module.exports = { updateUser_handler, deleteUser_handler, getUsersAll_handler }
+module.exports = { UpdateUser, DeleteUser, GetUsersAll }

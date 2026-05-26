@@ -1,9 +1,9 @@
 const console = require('node:console');
-const { createGroup, updateGroup, getAllGroup, deleteGroup } = require("../services/groupService.js")
+const { createGroup, updateGroup, getAllGroup, deleteGroup } = require("../services/group.js")
 
 
 
-async function createGroup_handler(request, response) {
+async function CreateGroup(request, response) {
 
     // * si el metodo de la peticion es POST accede a los datos de una forma diferente
     if (request.method == "POST") {
@@ -26,7 +26,7 @@ async function createGroup_handler(request, response) {
 
             } catch (error) {
                 response.writeHead(500, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(error.message));
+                response.end(JSON.stringify({message: error.message}));
             }
         })
 
@@ -39,7 +39,7 @@ async function createGroup_handler(request, response) {
 }
 
 // *node crea req y res y lo llena con lo basico (method, url). Luego req.body lo lleno yo al recorrer y concatenar el paquete, lo parseo y lo guardo en req.body. Si uso express este proceso lo hace automaticamente. PARSEANDOLO A JSON 
-async function updateGroup_handler(request, response) {
+async function UpdateGroup(request, response) {
 
     if (request.method == "PUT") {
 
@@ -61,7 +61,7 @@ async function updateGroup_handler(request, response) {
 
             } catch (error) {
                 response.writeHead(500, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(error.message));
+                response.end(JSON.stringify({message: error.message}));
             }
         })
 
@@ -73,7 +73,7 @@ async function updateGroup_handler(request, response) {
 }
 
 
-async function getGroup_handler(request, response) {
+async function GetGroup(request, response) {
 
     if (request.method == "GET") {
 
@@ -86,7 +86,7 @@ async function getGroup_handler(request, response) {
 
         } catch (error) {
             response.writeHead(500, { 'Content-Type': 'application/json' });
-            response.end(JSON.stringify(error.message));
+            response.end(JSON.stringify({message: error.message}));
         }
         
 
@@ -95,7 +95,7 @@ async function getGroup_handler(request, response) {
 }
 
 
-async function deleteGroup_handler(request, response) {
+async function DeleteGroup(request, response) {
     if (request.method == "DELETE") {
 
 
@@ -116,7 +116,7 @@ async function deleteGroup_handler(request, response) {
 
             } catch (error) {
                 response.writeHead(500, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(error.message));
+                response.end(JSON.stringify({message: error.message}));
             }
         })
 
@@ -127,4 +127,4 @@ async function deleteGroup_handler(request, response) {
 
 }
 
-module.exports = { createGroup_handler, updateGroup_handler, getGroup_handler, deleteGroup_handler }; 
+module.exports = { CreateGroup, UpdateGroup, GetGroup, DeleteGroup }; 

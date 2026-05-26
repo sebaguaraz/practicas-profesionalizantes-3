@@ -1,11 +1,11 @@
-const { crearAcceso, modificarAcceso, obtenerAccesos, eliminarAcceso } = require("../models/access.js");
+const { CreateAccessDB, UpdateAccessDB, GetAccessDB, DeleteAccessDB } = require("../models/access.js");
 
-const { getEndpointById } = require("../models/endpoint.js");
+const { GetEndpointByIdDB } = require("../models/endpoint.js");
 
 
-async function createAccess(objetoResultante) {
+async function createAccess(dataAccess) {
 
-    const { id_group, id_endpoint } = objetoResultante
+    const { id_group, id_endpoint } = dataAccess
 
     if (!id_group || !id_endpoint) {
         return { status: 400, message: "Campos obligatorios" }
@@ -13,8 +13,8 @@ async function createAccess(objetoResultante) {
 
     try {
 
-        
-        const result = await crearAcceso(id_group, id_endpoint)
+
+        const result = await CreateAccessDB(id_group, id_endpoint)
         return { id: result.id, status: 200, message: "Acceso creado con exito" }
 
     } catch (error) {
@@ -22,22 +22,22 @@ async function createAccess(objetoResultante) {
     }
 }
 
-async function updateAccess(objetoResultante) {
-    const { id_group, id_endpoint_old, id_endpoint_new } = objetoResultante;
+async function updateAccess(dataAccess) {
+    const { id_group, id_endpoint_old, id_endpoint_new } = dataAccess;
 
     if (!id_group || !id_endpoint_old || !id_endpoint_new) {
         return { status: 400, message: "Campos obligatorios" };
     }
 
     try {
-        
-        const existsEndpointNew = await getEndpointById(id_endpoint_new);
-        if(!existsEndpointNew){
+
+        const existsEndpointNew = await GetEndpointByIdDB(id_endpoint_new);
+        if (!existsEndpointNew) {
             return { status: 400, message: "Endpoint Nuevo no encontrado" };
         }
 
 
-        const result = await modificarAcceso(id_group, id_endpoint_old, existsEndpointNew.id);
+        const result = await UpdateAccessDB(id_group, id_endpoint_old, existsEndpointNew.id);
 
         if (!result) {
             return { status: 400, message: "Acceso no encontrado" };
@@ -52,7 +52,7 @@ async function updateAccess(objetoResultante) {
 async function getAllAccess() {
 
     try {
-        const result = await obtenerAccesos()
+        const result = await GetAccessDB()
 
         if (!result) {
             return { status: 400, message: "Accesos no encontrados" }
@@ -65,16 +65,16 @@ async function getAllAccess() {
     }
 }
 
-async function deleteAccess(objetoResultante) {
+async function deleteAccess(dataAccess) {
 
-    const { id_group, id_endpoint } = objetoResultante
+    const { id_group, id_endpoint } = dataAccess
 
     if (!id_group || !id_endpoint) {
         return { status: 400, message: "Campos obligatorios" }
     }
 
     try {
-        const result = await eliminarAcceso(id_group, id_endpoint)
+        const result = await DeleteAccessDB(id_group, id_endpoint)
 
         if (!result) {
             return { status: 400, message: "Acceso no encontrado" }

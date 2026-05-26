@@ -1,10 +1,10 @@
 //Lógica de negocio / Services (Son independientes de protocolos, comunicaciones directa a la db y servidor)
-const { obtenerUsuarioPorNombre } = require('../models/user.js');
+const { GetUserByNameDB } = require('../models/user.js');
 
 
-async function login(objetoResultante) {
+async function login(dataUser) {
 
-  const { username, password } = objetoResultante
+  const { username, password } = dataUser
 
 
   let output =
@@ -23,7 +23,7 @@ async function login(objetoResultante) {
       return output
     }
 
-    const userExists = await obtenerUsuarioPorNombre(username.trim());
+    const userExists = await GetUserByNameDB(username.trim());
 
     if (!userExists) {
       output.status = 400;

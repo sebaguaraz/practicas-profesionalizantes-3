@@ -1,8 +1,8 @@
-const { insertarEndpoint } = require("../models/endpoint.js")
+const { InsertEndpointDB } = require("../models/endpoint.js")
 
-async function createEndpoint(objetoResultante) {
+async function createEndpoint(dataEndpoint) {
 
-    const { path } = objetoResultante
+    const { path } = dataEndpoint
 
     if (!path) {
 
@@ -14,7 +14,7 @@ async function createEndpoint(objetoResultante) {
         // * si insertarGrupo() hace reject(err), await lanza ese error
         // * y el catch de esta funcion lo atrapa, por eso newGroup no llega a asignarse
         // * si falla la promesa internamente await hace throw new Error()
-        const newEndpoint = await insertarEndpoint(path.trim());
+        const newEndpoint = await InsertEndpointDB(path.trim());
 
         return { status: 200, id: newEndpoint.id, path: newEndpoint.path, message: "Endpoint creado con exito!!!" }
 

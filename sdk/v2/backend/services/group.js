@@ -1,4 +1,4 @@
-const { insertarGrupo, modificarGrupo, obtenerGrupos, eliminarGrupo } = require("../models/group")
+const { insertGroupDB, UpdateGroupDB, GetGroupDB, DeleteGroupDB, GetGroupByIdDB } = require("../models/group")
 
 async function createGroup(objetoResultante) {
 
@@ -13,7 +13,7 @@ async function createGroup(objetoResultante) {
         // * si insertarGrupo() hace reject(err), await lanza ese error
         // * y el catch de esta funcion lo atrapa, por eso newGroup no llega a asignarse
         // * si falla la promesa internamente await hace throw new Error()
-        const newGroup = await insertarGrupo(name.trim());
+        const newGroup = await insertGroupDB(name.trim());
 
 
         return { status: 200, id: newGroup.id, name: newGroup.name, message: "Grupo creado con exito!!!" }
@@ -35,7 +35,7 @@ async function updateGroup(objetoResultante) {
 
     try {
 
-        const result = await modificarGrupo(id_group, name.trim())
+        const result = await UpdateGroupDB(id_group, name.trim())
 
         if (!result) {
             return { status: 400, message: "No se realizo cambios" }
@@ -54,7 +54,7 @@ async function getAllGroup() {
 
     try {
 
-        const result = await obtenerGrupos();
+        const result = await GetGroupDB();
         if (!result) {
             return { status: 400, message: `no se encontraron grupos` }
         }
@@ -80,7 +80,7 @@ async function deleteGroup(objetoResultante) {
 
     try {
 
-        const result = await eliminarGrupo(id_group);
+        const result = await DeleteGroupDB(id_group);
         if (!result) {
             return { status: 400, message: `grupo con ID ${id_group} no encontrado` }
         }

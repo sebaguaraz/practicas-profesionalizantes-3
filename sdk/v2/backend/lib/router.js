@@ -1,65 +1,65 @@
-const { default_handler } = require("../controller/pageHandler");
+const { Default } = require("../controller/page");
 
 // * importamos modulos de autenticacion
-const { login_handler, register_handler } = require('../controller/authHandler');
+const { Login, Register } = require('../controller/auth');
 
 // * importamos modulos grupo
-const {createGroup_handler, updateGroup_handler, getGroup_handler, deleteGroup_handler}  = require('../controller/groupHandler');
+const {CreateGroup, UpdateGroup, GetGroup, DeleteGroup}  = require('../controller/group');
 
 // * importamos modulos usuario
-const { updateUser_handler, deleteUser_handler, getUsersAll_handler } = require("../controller/userHandler");
+const {UpdateUser, DeleteUser, GetUsersAll } = require("../controller/user");
 
 // * importamos modulos endpoint
-const { createEndpoint_handler } = require("../controller/endpointHandler");
+const { CreateEndpoint } = require("../controller/endpoint");
 
 // * importamos modulos miembros
-const { createMember_handler, updateMember_handler, deleteMember_handler, getMembers_handler } = require("../controller/memberHandler");
+const { CreateMember, UpdateMember, DeleteMember, GetMembers } = require("../controller/member");
 
 // * importamos modulos accesos
-const { createAccess_handler, updateAccess_handler, getAccessAll_handler, deleteAccess_handler } = require("../controller/accessHandler");
+const { CreateAccess, UpdateAccess, GetAccessAll, DeleteAccess } = require("../controller/access");
 
-function route() {
+function loadRouterMap() {
 
     let router = new Map();
 
-    // * Guardo una función anónima que, al ejecutarse en el dispatcher, llama a default_handler
+    // * Guardo una función anónima que, al ejecutarse en el dispatcher, llama a default
     // * pasando request, response.
 
     // *ruta principal
-    router.set('/', (request, response) => default_handler(request, response));
+    router.set('/', Default);
 
     // *rutas de autenticacion
-    router.set('/login', (request, response) => login_handler(request, response));
-    router.set('/register', (request, response) => register_handler(request, response));
+    router.set('/login', Login);
+    router.set('/register', Register);
 
     // * rutas de usuario
-    router.set("/updateUser", (request, response) => updateUser_handler(request, response));
-    router.set("/deleteUser", (request, response) => deleteUser_handler(request, response));
-    router.set("/getUsersAll", (request, response) => getUsersAll_handler(request, response));
+    router.set("/updateUser", UpdateUser);
+    router.set("/deleteUser", DeleteUser);
+    router.set("/getUsersAll", GetUsersAll);
 
     // * rutas de grupo
-    router.set("/createGroup", (request, response) => createGroup_handler(request, response));
-    router.set("/updateGroup", (request, response) => updateGroup_handler(request, response));
-    router.set("/getGroupAll", (request, response) => getGroup_handler(request, response));
-    router.set("/deleteGroup", (request, response) => deleteGroup_handler(request, response));
+    router.set("/createGroup", CreateGroup);
+    router.set("/updateGroup", UpdateGroup);
+    router.set("/getGroupAll", GetGroup);
+    router.set("/deleteGroup", DeleteGroup);
 
     // * rutas de endpoint
-    router.set("/createEndpoint", (request, response) => createEndpoint_handler(request, response));
+    router.set("/createEndpoint", CreateEndpoint);
     
     // * rutas de miembros
-    router.set("/createMember", (request, response) => createMember_handler(request, response));
-    router.set("/updateMember", (request, response) => updateMember_handler(request, response));
-    router.set("/deleteMember", (request, response) => deleteMember_handler(request, response));
-    router.set("/getMemberAll", (request, response) => getMembers_handler(request, response));
+    router.set("/createMember", CreateMember);
+    router.set("/updateMember", UpdateMember);
+    router.set("/deleteMember", DeleteMember);
+    router.set("/getMemberAll", GetMembers);
     
     // * rutas de accesos
-    router.set("/createAccess", (request, response) => createAccess_handler(request, response));
-    router.set("/updateAccess", (request, response) => updateAccess_handler(request, response));
-    router.set("/getAccessAll", (request, response) => getAccessAll_handler(request, response));
-    router.set("/deleteAccess", (request, response) => deleteAccess_handler(request, response));
+    router.set("/createAccess", CreateAccess);
+    router.set("/updateAccess", UpdateAccess);
+    router.set("/getAccessAll", GetAccessAll);
+    router.set("/deleteAccess", DeleteAccess);
 
     return router;
 
 }
 
-module.exports = route;
+module.exports = loadRouterMap;

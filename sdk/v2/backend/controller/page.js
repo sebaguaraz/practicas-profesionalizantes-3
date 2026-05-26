@@ -6,7 +6,7 @@ const config = require("../lib/config.js");
 //* -------------- HANDLER / CONTROLLER
 
 
-function default_handler(request, response) {
+function Default(request, response) {
     try {
         const htmlPath = resolve(config.server.default_path);
         const html = readFileSync(htmlPath, 'utf-8');
@@ -21,4 +21,4 @@ function default_handler(request, response) {
 }
 
 
-module.exports = {default_handler};
+module.exports = {Default};

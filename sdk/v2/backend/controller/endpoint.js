@@ -1,7 +1,7 @@
-const {createEndpoint} = require("../services/endpointService.js")
+const {createEndpoint} = require("../services/endpoint.js")
 
 
-async function createEndpoint_handler(request, response) {
+async function CreateEndpoint(request, response) {
 
     if (request.method == "POST") {
 
@@ -13,12 +13,12 @@ async function createEndpoint_handler(request, response) {
         })
 
         request.on("end", async () => {
-            const objetoResultante = JSON.parse(bodyComplete)
+            const dataEndpoint = JSON.parse(bodyComplete)
 
             try {
 
                 // *se los paso al metodo de LOGICA DE NEGOCIOS
-                const output = await createEndpoint(objetoResultante);
+                const output = await createEndpoint(dataEndpoint);
 
                 // * creo una RESPUESTA en base a lo que me devolvio la DB
                 response.writeHead(output.status, { 'Content-Type': 'application/json' });
@@ -27,7 +27,7 @@ async function createEndpoint_handler(request, response) {
             } catch (error) {
                 // * si ocurre un error en la logica de negocio que no se atrapa en su catch entra aca...
                 response.writeHead(500, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(error.message));
+                response.end(JSON.stringify({message: error.message}));
             }
 
 
@@ -41,4 +41,4 @@ async function createEndpoint_handler(request, response) {
 
 
 
-module.exports = { createEndpoint_handler };
+module.exports = { CreateEndpoint };

@@ -1,27 +1,24 @@
 const { createServer } = require('node:http');
 const { URL } = require('node:url');
 
-const { default_handler } = require('./controller/pageHandler');
-const { login_handler, register_handler } = require('./controller/authHandler');
-
 const config = require("./lib/config.js");
 
-const router = require("./lib/router.js")
+const loadRouterMap = require("./lib/router.js")
 
-const { initializeUserTable } = require('./models/user.js');
-const { initializeGroupTable } = require('./models/group.js');
-const { initializeEndpointTable } = require('./models/endpoint.js');
-const { initializeMemberTable } = require('./models/member.js');
-const {initializeAccessTable} = require("./models/access.js");
+const { InitializeUserTable } = require('./models/user.js');
+const { InitializeGroupTable } = require('./models/group.js');
+const { InitializeEndpointTable } = require('./models/endpoint.js');
+const { InitializeMemberTable } = require('./models/member.js');
+const {InitializeAccessTable} = require("./models/access.js");
 
-initializeEndpointTable();
-initializeUserTable();
-initializeGroupTable();
-initializeMemberTable();
-initializeAccessTable();
+InitializeEndpointTable();
+InitializeUserTable();
+InitializeGroupTable();
+InitializeMemberTable();
+InitializeAccessTable();
 
 
-const object_route = router();
+const object_route = loadRouterMap();
 
 //Despachador principal
 async function request_dispatcher(request, response) {

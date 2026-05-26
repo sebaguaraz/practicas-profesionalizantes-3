@@ -1,16 +1,11 @@
 const sqlite3 = require('sqlite3');
-const console = require('node:console');
+const { resolve } = require('node:path');
+const config = require('./config.js');
 
-const config  = require("../lib/config.js");
-const path = config.database.path;
-
-// *crea la conexion a la base de datos
-//-------------- BASE DE DATOS
-
+const dbPath = resolve(__dirname, "..", config.database.path);
 
 function getDatabaseConnection() {
-
-    const db = new sqlite3.Database(path, (err) => {
+    const db = new sqlite3.Database(dbPath, (err) => {
         if (err) {
             throw new Error(`Error al conectar a la base de datos: ${err.message}`);
         }
@@ -18,7 +13,6 @@ function getDatabaseConnection() {
 
     return db;
 }
-
 
 module.exports = {
     getDatabaseConnection

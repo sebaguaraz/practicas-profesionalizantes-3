@@ -1,6 +1,6 @@
-const {createMember, updateMember, getMembers, deleteMember} = require("../services/memberService");
+const {createMember, updateMember, getMembers, deleteMember} = require("../services/member");
 
-async function createMember_handler(request, response){
+async function CreateMember(request, response){
 
     if(request.method === "POST"){
 
@@ -13,10 +13,10 @@ async function createMember_handler(request, response){
 
         request.on("end", async () => {
             try {
-                const objetoResultante = JSON.parse(bodyComplete);
+                const dataMember = JSON.parse(bodyComplete);
 
                 // *se los paso al metodo de LOGICA DE NEGOCIOS
-                const output = await createMember(objetoResultante);
+                const output = await createMember(dataMember);
 
                 // * creo una RESPUESTA en base a lo que me devolvio la DB
                 response.writeHead(output.status, { 'Content-Type': 'application/json' });
@@ -25,13 +25,13 @@ async function createMember_handler(request, response){
             } catch (error) {
 
                 response.writeHead(500, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(error.message));
+                response.end(JSON.stringify({message: error.message}));
             }
         })
     }
 }
 
-async function updateMember_handler(request, response){
+async function UpdateMember(request, response){
 
     if(request.method === "PUT"){
 
@@ -44,10 +44,10 @@ async function updateMember_handler(request, response){
 
         request.on("end", async () => {
             try {
-                const objetoResultante = JSON.parse(bodyComplete);
+                const dataMember = JSON.parse(bodyComplete);
 
                 // *se los paso al metodo de LOGICA DE NEGOCIOS
-                const output = await updateMember(objetoResultante);
+                const output = await updateMember(dataMember);
 
                 // * creo una RESPUESTA en base a lo que me devolvio la DB
                 response.writeHead(output.status, { 'Content-Type': 'application/json' });
@@ -56,13 +56,13 @@ async function updateMember_handler(request, response){
             } catch (error) {
 
                 response.writeHead(500, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(error.message));
+                response.end(JSON.stringify({message: error.message}));
             }
         })
     }
 }
 
-async function deleteMember_handler(request, response){
+async function DeleteMember(request, response){
 
     if(request.method === "DELETE"){
 
@@ -75,10 +75,10 @@ async function deleteMember_handler(request, response){
 
         request.on("end", async () => {
             try {
-                const objetoResultante = JSON.parse(bodyComplete);
+                const dataMember = JSON.parse(bodyComplete);
 
                 // *se los paso al metodo de LOGICA DE NEGOCIOS
-                const output = await deleteMember(objetoResultante);
+                const output = await deleteMember(dataMember);
 
                 // * creo una RESPUESTA en base a lo que me devolvio la DB
                 response.writeHead(output.status, { 'Content-Type': 'application/json' });
@@ -87,13 +87,13 @@ async function deleteMember_handler(request, response){
             } catch (error) {
 
                 response.writeHead(500, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(error.message));
+                response.end(JSON.stringify({message: error.message}));
             }
         })
     }
 }
 
-async function getMembers_handler(request, response){
+async function GetMembers(request, response){
 
     if(request.method == "GET"){
 
@@ -108,7 +108,7 @@ async function getMembers_handler(request, response){
         } catch (error) {
 
             response.writeHead(500, { 'Content-Type': 'application/json' });
-            response.end(JSON.stringify(error.message));
+            response.end(JSON.stringify({message: error.message}));
         }
     }
 }
@@ -116,8 +116,8 @@ async function getMembers_handler(request, response){
 
 
 module.exports = {
-    createMember_handler,
-    updateMember_handler,
-    deleteMember_handler,
-    getMembers_handler
+    CreateMember,
+    UpdateMember,
+    DeleteMember,
+    GetMembers
 }

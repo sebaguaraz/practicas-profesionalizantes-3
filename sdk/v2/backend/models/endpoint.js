@@ -2,70 +2,56 @@ const { getDatabaseConnection } = require('../lib/database.js');
 
 const db = getDatabaseConnection();
 
-function initializeEndpointTable() {
-
-    const sql = `CREATE TABLE IF NOT EXISTS endpoint (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        path TEXT NOT NULL UNIQUE
-    )    
-    `
+function InitializeEndpointTable() {
+    const sql = `
+    CREATE TABLE IF NOT EXISTS endpoint (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      path TEXT NOT NULL UNIQUE
+    )
+  `;
 
     db.run(sql, (err) => {
-        if (err)
+        if (err) {
             throw new Error("Error creando table endpoint");
-
-    })
-
-
-
+        }
+    });
 }
 
-function insertarEndpoint(path) {
-
-    const sql = `INSERT INTO endpoint (path) VALUES (?)`
+function InsertEndpointDB(path) {
+    const sql = `INSERT INTO endpoint (path) VALUES (?)`;
 
     return new Promise((resolve, reject) => {
-
         db.run(sql, [path], function (err) {
             if (err) {
-                reject(err)
-                return
+                reject(err);
+                return;
             }
 
-            const respuesta = {
+            resolve({
                 id: this.lastID,
-                path: path
-            }
-
-            resolve(respuesta)
-        })
-
-    })
+                path
+            });
+        });
+    });
 }
 
-function getEndpointById(id){
-
-    const sql = `SELECT * FROM endpoint WHERE id = ?`
+function GetEndpointByIdDB(id) {
+    const sql = `SELECT * FROM endpoint WHERE id = ?`;
 
     return new Promise((resolve, reject) => {
         db.get(sql, [id], function (err, row) {
             if (err) {
-                reject(err)
-                return
-            }else if(!row){
-                resolve(null)
-                return
+                reject(err);
+                return;
             }
 
-            resolve(row)
-        })
-    })
+            resolve(row || null);
+        });
+    });
 }
-
-
 
 module.exports = {
-    initializeEndpointTable,
-    insertarEndpoint,
-    getEndpointById
-}
+    InitializeEndpointTable,
+    InsertEndpointDB,
+    GetEndpointByIdDB
+};

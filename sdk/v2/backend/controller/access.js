@@ -1,6 +1,6 @@
-const { createAccess, updateAccess, getAllAccess, deleteAccess } = require("../services/accessService.js");
+const { createAccess, updateAccess, getAllAccess, deleteAccess } = require("../services/access.js");
 
-async function createAccess_handler(request, response) {
+async function CreateAccess(request, response) {
 
     if (request.method === "POST") {
 
@@ -12,12 +12,12 @@ async function createAccess_handler(request, response) {
         })
 
         request.on("end", async () => {
-            const objetoResultante = JSON.parse(bodyComplete)
+            const dataAccess = JSON.parse(bodyComplete)
 
             try {
 
                 // *se los paso al metodo de LOGICA DE NEGOCIOS
-                const output = await createAccess(objetoResultante);
+                const output = await createAccess(dataAccess);
 
                 // * creo una RESPUESTA en base a lo que me devolvio la DB
                 response.writeHead(output.status, { 'Content-Type': 'application/json' });
@@ -25,7 +25,7 @@ async function createAccess_handler(request, response) {
 
             } catch (error) {
                 response.writeHead(500, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(error.message));
+                response.end(JSON.stringify({message: error.message}));
             }
         })
     }
@@ -33,7 +33,7 @@ async function createAccess_handler(request, response) {
 }
 
 
-async function updateAccess_handler(request, response) {
+async function UpdateAccess(request, response) {
 
     if (request.method == "PUT") {
 
@@ -45,12 +45,12 @@ async function updateAccess_handler(request, response) {
         })
 
         request.on("end", async () => {
-            const objetoResultante = JSON.parse(bodyComplete)
+            const dataAccess = JSON.parse(bodyComplete)
 
             try {
 
                 // *se los paso al metodo de LOGICA DE NEGOCIOS
-                const output = await updateAccess(objetoResultante);
+                const output = await updateAccess(dataAccess);
 
                 // * creo una RESPUESTA en base a lo que me devolvio la DB
                 response.writeHead(output.status, { 'Content-Type': 'application/json' });
@@ -58,14 +58,14 @@ async function updateAccess_handler(request, response) {
 
             } catch (error) {
                 response.writeHead(500, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(error.message));
+                response.end(JSON.stringify({message: error.message}));
             }
         })
     }
 }
 
 
-async function getAccessAll_handler(request, response) {
+async function GetAccessAll(request, response) {
 
     if (request.method === "GET") {
 
@@ -80,13 +80,13 @@ async function getAccessAll_handler(request, response) {
 
         } catch (error) {
             response.writeHead(500, { 'Content-Type': 'application/json' });
-            response.end(JSON.stringify(error.message));
+            response.end(JSON.stringify({message: error.message}));
         }
     }
 }
 
 
-async function deleteAccess_handler(request, response) {
+async function DeleteAccess(request, response) {
 
     if (request.method === "DELETE") {
 
@@ -97,12 +97,12 @@ async function deleteAccess_handler(request, response) {
         })
 
         request.on("end", async () => {
-            const objetoResultante = JSON.parse(bodyComplete)
+            const dataAccess = JSON.parse(bodyComplete)
 
             try {
 
                 // *se los paso al metodo de LOGICA DE NEGOCIOS
-                const output = await deleteAccess(objetoResultante);
+                const output = await deleteAccess(dataAccess);
 
                 // * creo una RESPUESTA en base a lo que me devolvio la DB
                 response.writeHead(output.status, { 'Content-Type': 'application/json' });
@@ -110,7 +110,7 @@ async function deleteAccess_handler(request, response) {
 
             } catch (error) {
                 response.writeHead(500, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(error.message));
+                response.end(JSON.stringify({message: error.message}));
             }
         })
     }
@@ -123,4 +123,4 @@ async function deleteAccess_handler(request, response) {
 
 
 
-module.exports = { createAccess_handler, updateAccess_handler, getAccessAll_handler, deleteAccess_handler }
+module.exports = { CreateAccess, UpdateAccess, GetAccessAll, DeleteAccess }

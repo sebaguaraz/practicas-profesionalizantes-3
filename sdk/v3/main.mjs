@@ -412,8 +412,9 @@ async function request_dispatcher(request, response) {
     }
 
     const data = Object.fromEntries(url.searchParams);
+    console.log(data)
 
-    let username = data.username
+    let { username } = data
 
     // * debo validar si tiene una sesion REGISTRADA-ACTIVA en el sistema sino debe loguearse de vuelta
     const existSession = userSessions.get(username)

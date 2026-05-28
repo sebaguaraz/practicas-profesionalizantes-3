@@ -82,7 +82,7 @@ function authenticate(username, password) {
     }
 }
 
-// * Es una validaciÃ³n intermedia del backend que se ejecuta antes del handler final
+// * Es una validacion intermedia del backend que se ejecuta antes del handler final
 // * debe recibir, quien lo quiere hacer? y que quiere hacer?
 function authorize(username, path) {
 
@@ -128,7 +128,7 @@ function login(username, password) {
 
             if (!havePreviousSession) {
 
-                //* Significa que estÃ¡ ingresando por primera vez. Entonces, creo y persisto el objeto de sesiÃ³n
+                //* Significa que esta ingresando por primera vez. Entonces, creo y persisto el objeto de sesiÃ³n
                 let newSession = new UserSession(username);
                 newSession.status = 'enabled';
                 userSessions.set(username, newSession);
@@ -140,7 +140,7 @@ function login(username, password) {
 
             }
 
-            //* Significa que ya ingresÃ³ en algÃºn momento y tiene ya un objeto de sesiÃ³n creado y guardado en el mapa.
+            //* Significa que ya ingreso en algun momento y tiene ya un objeto de sesion creado y guardado en el mapa.
             if (havePreviousSession.status == 'disabled') {
                 havePreviousSession.status = 'enabled';
             }
@@ -169,7 +169,7 @@ function logout(username, password) {
     // * se debe autenticar antes de modificar el estado de la sesion porque sino cualquiera que tenga mi USERNAME puede cerrarme la sesion. EN CAMBIO, necesita mi PASSWORD para hacer LOGOUT
     let isAuthenticated = authenticate(username, password);
     if (!isAuthenticated) {
-        return { status: 400, message: "No esta autenticado para hacer logout" }
+        return { status: 400, message: "No esta autenticado para hacer logout, debe hacer login" }
     }
     let currentSession = userSessions.get(username);
     if (!currentSession) {
@@ -180,7 +180,7 @@ function logout(username, password) {
 
 }
 
-// LÃ³gica de negocio
+// Logica de negocio
 async function createUser(db, username, password) {
     const sql = "INSERT INTO user (username, password) VALUES (?, ?) RETURNING id";
 

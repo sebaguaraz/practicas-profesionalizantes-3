@@ -1,5 +1,4 @@
-const { getDatabaseConnection } = require("../lib/database.js");
-const db = getDatabaseConnection();
+const { db } = require("../lib/database.js");
 
 function InitializeUserTable() {
   const sql = `
@@ -10,11 +9,7 @@ function InitializeUserTable() {
     )
   `;
 
-  db.run(sql, (err) => {
-    if (err) {
-      throw new Error(`Error creando tabla users: ${err.message}`);
-    }
-  });
+  db.exec(sql);
 }
 
 function InsertUserDB(username, password) {
@@ -22,106 +17,77 @@ function InsertUserDB(username, password) {
     INSERT INTO user (username, password)
     VALUES (?, ?)
   `;
+  const stmt = db.prepare(sql);
 
-  return new Promise((resolve, reject) => {
-    db.run(sql, [username, password], function (err) {
-      if (err) {
-        reject(err);
-        return;
-      }
+  const result = stmt.run(username, password);
 
-      resolve({
-        id: this.lastID,
-        username,
-        password
-      });
-    });
-  });
+  return {
+    id: Number(result.lastInsertRowid),
+    username: username
+  };
 }
 
 function GetUserByNameDB(username) {
   const sql = `
     SELECT * FROM user WHERE username = ?
   `;
+  const stmt = db.prepare(sql);
 
-  return new Promise((resolve, reject) => {
-    db.get(sql, [username], function (err, row) {
-      if (err) {
-        reject(err);
-        return;
-      }
+  const result = stmt.get(username);
 
-      resolve(row);
-    });
-  });
+  return result || null;
 }
 
 function GetUserByIdDB(id) {
   const sql = `SELECT * FROM user WHERE id = ?`;
+  const stmt = db.prepare(sql);
 
-  return new Promise((resolve, reject) => {
-    db.get(sql, [id], function (err, row) {
-      if (err) {
-        reject(err);
-        return;
-      }
+  const result = stmt.get(id);
 
-      resolve(row || null);
-    });
-  });
+  return result || null;
 }
 
 function UpdateUserDB(id_user, password) {
   const sql = `UPDATE user SET password = ? WHERE id = ?`;
+  const stmt = db.prepare(sql);
 
-  return new Promise((resolve, reject) => {
-    db.run(sql, [password, id_user], function (err) {
-      if (err) {
-        reject(err);
-        return;
-      }
+  const result = stmt.run(password, id_user);
 
-      if (this.changes === 0) {
-        resolve(null);
-      } else {
-        resolve({ id: id_user });
-      }
-    });
-  });
+  if (result.changes === 0) {
+    return null;
+  }
+
+  return {
+    id: id_user
+  };
 }
 
 function DeleteUserDB(id) {
   const sql = `DELETE FROM user WHERE id = ?`;
+  const stmt = db.prepare(sql);
 
-  return new Promise((resolve, reject) => {
-    db.run(sql, [id], function (err) {
-      if (err) {
-        reject(err);
-        return;
-      }
+  const result = stmt.run(id);
 
-      if (this.changes === 0) {
-        resolve(null);
-      } else {
-        resolve({ id });
-      }
-    });
-  });
+  if (result.changes === 0) {
+    return null;
+  }
+
+  return {
+    id: id
+  };
 }
 
 function GetUsersAllDB() {
   const sql = `SELECT id, username FROM user`;
+  const stmt = db.prepare(sql);
 
-  return new Promise((resolve, reject) => {
-    db.all(sql, function (err, rows) {
-      if (err) {
-        reject(err);
-        return;
-      }
+  const result = stmt.all();
 
-      resolve(rows.length === 0 ? null : rows);
-    });
-  });
+  if (result.length === 0) {
+    return null;
+  }
+
+  return result;
 }
 
 module.exports = {

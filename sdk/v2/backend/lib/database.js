@@ -1,19 +1,8 @@
-const sqlite3 = require('sqlite3');
+const { DatabaseSync } = require('node:sqlite');
 const { resolve } = require('node:path');
 const config = require('./config.js');
 
 const dbPath = resolve(__dirname, "..", config.database.path);
+const db = new DatabaseSync(dbPath);
 
-function getDatabaseConnection() {
-    const db = new sqlite3.Database(dbPath, (err) => {
-        if (err) {
-            throw new Error(`Error al conectar a la base de datos: ${err.message}`);
-        }
-    });
-
-    return db;
-}
-
-module.exports = {
-    getDatabaseConnection
-};
+module.exports = { db };

@@ -1,6 +1,4 @@
-const { getDatabaseConnection } = require('../lib/database.js');
-
-const db = getDatabaseConnection();
+const { db } = require('../lib/database.js');
 
 function InitializeAccessTable() {
     const sql = `
@@ -13,81 +11,63 @@ function InitializeAccessTable() {
     )
   `;
 
-    db.run(sql, (err) => {
-        if (err) {
-            throw new Error("Error creando table access");
-        }
-    });
+    db.exec(sql);
 }
 
 function CreateAccessDB(id_group, id_endpoint) {
     const sql = `INSERT INTO access (id_group, id_endpoint) VALUES (?, ?)`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.run(sql, [id_group, id_endpoint], function (err) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.run(id_group, id_endpoint);
 
-            resolve({ id: this.lastID });
-        });
-    });
+    return {
+        id: Number(result.lastInsertRowid)
+    };
 }
 
 function UpdateAccessDB(id_group, id_endpoint_old, id_endpoint_new) {
     const sql = `UPDATE access SET id_endpoint = ? WHERE id_group = ? AND id_endpoint = ?`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.run(sql, [id_endpoint_new, id_group, id_endpoint_old], function (err) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.run(id_endpoint_new, id_group, id_endpoint_old);
 
-            if (this.changes === 0) {
-                resolve(null);
-            } else {
-                resolve({
-                    id: this.lastID
-                });
-            }
-        });
-    });
+    if (result.changes === 0) {
+        return null;
+    }
+
+    return {
+        id_group: id_group,
+        id_endpoint_old: id_endpoint_old,
+        id_endpoint_new: id_endpoint_new
+    };
 }
 
 function GetAccessDB() {
     const sql = `SELECT id_group, id_endpoint FROM access`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.all(sql, function (err, rows) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.all();
 
-            resolve(rows.length === 0 ? null : rows);
-        });
-    });
+    if (result.length === 0) {
+        return null;
+    }
+
+    return result;
 }
 
 function DeleteAccessDB(id_group, id_endpoint) {
     const sql = `DELETE FROM access WHERE id_group = ? AND id_endpoint = ?`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.run(sql, [id_group, id_endpoint], function (err) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.run(id_group, id_endpoint);
 
-            if (this.changes === 0) {
-                resolve(null);
-            } else {
-                resolve({ message: "Acceso eliminado" });
-            }
-        });
-    });
+    if (result.changes === 0) {
+        return null;
+    }
+
+    return {
+        message: "Acceso eliminado"
+    };
 }
 
 module.exports = {

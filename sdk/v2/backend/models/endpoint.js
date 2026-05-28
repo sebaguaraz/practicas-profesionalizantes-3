@@ -1,6 +1,4 @@
-const { getDatabaseConnection } = require('../lib/database.js');
-
-const db = getDatabaseConnection();
+const { db } = require('../lib/database.js');
 
 function InitializeEndpointTable() {
     const sql = `
@@ -10,44 +8,28 @@ function InitializeEndpointTable() {
     )
   `;
 
-    db.run(sql, (err) => {
-        if (err) {
-            throw new Error("Error creando table endpoint");
-        }
-    });
+    db.exec(sql);
 }
 
 function InsertEndpointDB(path) {
     const sql = `INSERT INTO endpoint (path) VALUES (?)`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.run(sql, [path], function (err) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.run(path);
 
-            resolve({
-                id: this.lastID,
-                path
-            });
-        });
-    });
+    return {
+        id: Number(result.lastInsertRowid),
+        path: path
+    };
 }
 
 function GetEndpointByIdDB(id) {
     const sql = `SELECT * FROM endpoint WHERE id = ?`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.get(sql, [id], function (err, row) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.get(id);
 
-            resolve(row || null);
-        });
-    });
+    return result || null;
 }
 
 module.exports = {

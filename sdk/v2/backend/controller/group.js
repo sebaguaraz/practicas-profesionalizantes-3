@@ -18,8 +18,8 @@ async function CreateGroup(request, response) {
         request.on("end", async () => {
             try {
 
-                const objetoResultante = JSON.parse(bodyComplete)
-                const output = await createGroup(objetoResultante);
+                const dataGroup = JSON.parse(bodyComplete)
+                const output = await createGroup(dataGroup);
 
                 response.writeHead(output.status, { 'Content-Type': 'application/json' });
                 response.end(JSON.stringify(output));
@@ -53,8 +53,8 @@ async function UpdateGroup(request, response) {
         request.on("end", async () => {
             try {
 
-                const objetoResultante = JSON.parse(bodyComplete)
-                const output = await updateGroup(objetoResultante);
+                const dataGroup = JSON.parse(bodyComplete)
+                const output = await updateGroup(dataGroup);
 
                 response.writeHead(output.status, { 'Content-Type': 'application/json' });
                 response.end(JSON.stringify(output));
@@ -108,8 +108,8 @@ async function DeleteGroup(request, response) {
 
         request.on("end", async () => {
             try {
-                const objetoResultante = JSON.parse(bodyComplete)
-                const output = await deleteGroup(objetoResultante);
+                const dataGroup = JSON.parse(bodyComplete)
+                const output = await deleteGroup(dataGroup);
 
                 response.writeHead(output.status, { 'Content-Type': 'application/json' });
                 response.end(JSON.stringify(output));

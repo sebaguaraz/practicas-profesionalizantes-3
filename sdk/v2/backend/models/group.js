@@ -1,6 +1,4 @@
-const { getDatabaseConnection } = require('../lib/database.js');
-
-const db = getDatabaseConnection();
+const { db } = require('../lib/database.js');
 
 function InitializeGroupTable() {
     const sql = `
@@ -10,97 +8,76 @@ function InitializeGroupTable() {
     )
   `;
 
-    db.run(sql, (err) => {
-        if (err) {
-            throw new Error("Error creando table group");
-        }
-    });
+    db.exec(sql);
 }
 
 function insertGroupDB(name) {
     const sql = `INSERT INTO "group" (name) VALUES (?)`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.run(sql, [name], function (err) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.run(name);
 
-            resolve({
-                id: this.lastID,
-                name
-            });
-        });
-    });
+    return {
+        id: Number(result.lastInsertRowid),
+        name: name
+    };
 }
 
 function GetGroupDB() {
     const sql = `SELECT * FROM "group"`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.all(sql, function (err, rows) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.all();
 
-            resolve(rows.length === 0 ? null : rows);
-        });
-    });
+    if (result.length === 0) {
+        return null;
+    }
+
+    return result;
 }
 
 function GetGroupByIdDB(new_id_group) {
     const sql = `SELECT * FROM "group" WHERE id = ?`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.get(sql, [new_id_group], function (err, row) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.get(new_id_group);
 
-            resolve(row || null);
-        });
-    });
+    if (!result) {
+        return null;
+    }
+
+    return result;
 }
 
 function UpdateGroupDB(id, name) {
     const sql = `UPDATE "group" SET name = ? WHERE id = ?`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.run(sql, [name, id], function (err) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.run(name, id);
 
-            if (this.changes === 0) {
-                resolve(null);
-            } else {
-                resolve({ id, name });
-            }
-        });
-    });
+    if (result.changes === 0) {
+        return null;
+    }
+
+    return {
+        id: id,
+        name: name
+    };
 }
 
 function DeleteGroupDB(id_group) {
     const sql = `DELETE FROM "group" WHERE id = ?`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.run(sql, [id_group], function (err) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.run(id_group);
 
-            if (this.changes === 0) {
-                resolve(null);
-            } else {
-                resolve({ id: id_group });
-            }
-        });
-    });
+    if (result.changes === 0) {
+        return null;
+    }
+
+    return {
+        id: id_group
+    };
 }
 
 module.exports = {

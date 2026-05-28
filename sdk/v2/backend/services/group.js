@@ -1,8 +1,8 @@
 const { insertGroupDB, UpdateGroupDB, GetGroupDB, DeleteGroupDB, GetGroupByIdDB } = require("../models/group")
 
-async function createGroup(objetoResultante) {
+async function createGroup(dataGroup) {
 
-    const { name } = objetoResultante
+    const { name } = dataGroup
 
     if (!name) {
 
@@ -27,8 +27,8 @@ async function createGroup(objetoResultante) {
 
 }
 
-async function updateGroup(objetoResultante) {
-    const { id_group, name } = objetoResultante;
+async function updateGroup(dataGroup) {
+    const { id_group, name } = dataGroup;
     if (!id_group || !name) {
         return { status: 400, message: "Campos obligatorios" }
     }
@@ -71,9 +71,9 @@ async function getAllGroup() {
 
 }
 
-async function deleteGroup(objetoResultante) {
+async function deleteGroup(dataGroup) {
 
-    const { id_group } = objetoResultante
+    const { id_group } = dataGroup
     if (!id_group) {
         return { status: 400, message: "El id es un campo obligatorio" }
     }

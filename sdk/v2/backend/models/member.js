@@ -1,6 +1,4 @@
-const { getDatabaseConnection } = require('../lib/database.js');
-
-const db = getDatabaseConnection();
+const { db } = require('../lib/database.js');
 
 function InitializeMemberTable() {
     const sql = `
@@ -13,85 +11,66 @@ function InitializeMemberTable() {
     )
   `;
 
-    db.run(sql, (err) => {
-        if (err) {
-            throw new Error("Error creando table members");
-        }
-    });
+    db.exec(sql);
 }
 
 function CreateMemberDB(id_group, id_user) {
     const sql = `INSERT INTO members (id_group, id_user) VALUES (?, ?)`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.run(sql, [id_group, id_user], function (err) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.run(id_group, id_user);
 
-            resolve({
-                id: this.lastID
-            });
-        });
-    });
+    return {
+        id: Number(result.lastInsertRowid),
+        id_group: id_group,
+        id_user: id_user
+    };
 }
 
 function UpdateMemberDB(id_user, old_id_group, new_id_group) {
     const sql = `UPDATE members SET id_group = ? WHERE id_user = ? AND id_group = ?`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.run(sql, [new_id_group, id_user, old_id_group], function (err) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.run(new_id_group, id_user, old_id_group);
 
-            if (this.changes === 0) {
-                resolve(null);
-            } else {
-                resolve({
-                    id: this.lastID
-                });
-            }
-        });
-    });
+    if (result.changes === 0) {
+        return null;
+    }
+
+    return {
+        id_user: id_user,
+        old_id_group: old_id_group,
+        new_id_group: new_id_group
+    };
 }
 
 function GetMemberDB() {
     const sql = `SELECT id_user, id_group FROM members`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.all(sql, function (err, rows) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.all();
 
-            resolve(rows.length === 0 ? null : rows);
-        });
-    });
+    if (result.length === 0) {
+        return null;
+    }
+
+    return result;
 }
 
 function DeleteMemberDB(id_group, id_user) {
     const sql = `DELETE FROM members WHERE id_group = ? AND id_user = ?`;
+    const stmt = db.prepare(sql);
 
-    return new Promise((resolve, reject) => {
-        db.run(sql, [id_group, id_user], function (err) {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const result = stmt.run(id_group, id_user);
 
-            if (this.changes === 0) {
-                resolve(null);
-            } else {
-                resolve({
-                    id: this.lastID
-                });
-            }
-        });
-    });
+    if (result.changes === 0) {
+        return null;
+    }
+
+    return {
+        id_group: id_group,
+        id_user: id_user
+    };
 }
 
 module.exports = {

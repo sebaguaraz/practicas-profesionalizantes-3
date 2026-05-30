@@ -98,7 +98,7 @@ function authorize(username, path) {
 
     try {
         const stmt = db.prepare(sql);
-        // Pasamos los parÃ¡metros en el orden de los signos de interrogaciÃ³n
+        // Pasamos los parametros en el orden de los signos de interrogaciÃ³n
         const row = stmt.get(username, path);
 
         // Si el conteo es mayor a 0, tiene permiso
@@ -281,7 +281,7 @@ async function login_handler(request, response) {
 
         request.on('end', async () => {
             try {
-                // 3. Convertimos el string a objeto (asumiendo que envÃ­an JSON)
+                // 3. Convertimos el string a objeto (asumiendo que envi­an JSON)
                 const input = JSON.parse(body);
 
                 // 4. Procesamos el login
@@ -377,6 +377,42 @@ async function getUser_handler(request, response) {
 
     }
 }
+function isPublicPath(path) {
+    try {
+        const stmtEndpoint = db.prepare(`
+            SELECT id_endpoint_status
+            FROM endpoint
+            WHERE path = ?
+            
+        `);
+
+        const endpointRow = stmtEndpoint.get(path);
+
+        if (!endpointRow) {
+            return false;
+        }
+
+        const stmtStatus = db.prepare(`
+            SELECT name
+            FROM endpoint_status
+            WHERE id = ?
+            
+        `);
+
+        const statusRow = stmtStatus.get(endpointRow.id_endpoint_status);
+
+        if (!statusRow) {
+            return false;
+        }
+
+        return statusRow.name === 'public';
+    }
+    catch (err) {
+        console.error("Error consultando el estado del endpoint:", err);
+        return false;
+    }
+}
+
 
 // Ruteo
 let router = new Map();
@@ -405,9 +441,8 @@ async function request_dispatcher(request, response) {
         return;
     }
 
-    const listProtected = ["/print", "/log", "/help", "/sayHello", "/sayBye"]
+    if (isPublicPath(path)) {
 
-    if (!listProtected.includes(path)) {
         return handler(request, response)
     }
 

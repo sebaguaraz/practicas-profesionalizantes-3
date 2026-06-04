@@ -283,7 +283,7 @@ async function login_handler(request, response) {
             try {
                 // 3. Convertimos el string a objeto (asumiendo que envi­an JSON)
                 const input = JSON.parse(body);
-
+                console.log(input)
                 // 4. Procesamos el login
                 const output = login(input.username, input.password); //El resultado es un mensaje o un objeto de sesion
 
@@ -322,7 +322,7 @@ function logout_handler(request, response) {
 
                 const output = logout(username, password)
                 response.writeHead(output.status, { 'Content-Type': 'application/json' })
-                response.end(JSON.stringify(output));
+                response.end(JSON.stringify(output ));
 
             }
             catch (err) {
@@ -336,20 +336,35 @@ function logout_handler(request, response) {
 
 
 async function register_handler(request, response) {
-    //Caso GET
-    const url = new URL(request.url, 'http://' + config.server.ip);
-    const input = Object.fromEntries(url.searchParams);
+    //Caso POST
 
-    try {
-        const output = await createUser(db, 'test', '123456789');
+    if (request.method === "POST") {
+        let body = '';
 
-        response.writeHead(200, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify(output));
+        request.on('data', chunk => {
+            body += chunk.toString();
+        });
+
+        request.on('end', async () => {
+            try {
+                const data = JSON.parse(body);
+                console.log(data)
+                const { username, password } = data
+
+                const output = await createUser(db, username, password);
+
+                response.writeHead(200, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({output, message: "Usuario registrado correctamente" }));
+            }
+            catch (err) {
+                response.writeHead(500);
+                response.end(JSON.stringify({ error: err.message }));
+            }
+
+        });
+
     }
-    catch (err) {
-        response.writeHead(500);
-        response.end(JSON.stringify({ error: err.message }));
-    }
+
 }
 
 

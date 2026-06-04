@@ -9,6 +9,15 @@
 <body>
 	<p id="result"></p>
 
+	<h1>Registro de usuario</h1>
+	<form id="form-register">
+		<label>Usuario:</label>
+		<input name="username" required><br>
+		<label>Password:</label>
+		<input type="password" name="password" required><br>
+		<button type="submit">Registrar usuario</button>
+	</form>
+
 	<h1>Login de usuarios</h1>
 	<form id="form-login">
 		<label>Usuario:</label>
@@ -23,7 +32,7 @@
 		<label>Usuario:</label>
 		<input name="username" required><br>
 		<label>Password:</label>
-		<input name="password" required placeholder="###"><br>
+		<input name="password"  type="password" placeholder="###"><br>
 		<button type="submit">cerrar sesion</button>
 	</form>
 
@@ -37,6 +46,7 @@
 
 	const span = document.getElementById('result');
 	const form_login = document.getElementById('form-login');
+	const form_register = document.getElementById('form-register');
 	const form_logout = document.getElementById('form-logout');
 
 	const btnGetLog = document.getElementById('btnGetLog');
@@ -44,15 +54,32 @@
 
 	let sessionExist = null
 
-	function getDataLogin(event) {
+	// Función para calcular el hash SHA-256 de una cadena
+	async function calcularHashSHA256(cadena) {
+		// * creo un objeto para convertir la cadena a un formato de bytes
+		const encoder = new TextEncoder();
+		// * convierto la cadena a un array de bytes
+		const data = encoder.encode(cadena);
+		// * aplico el algoritmo SHA-256 al array de bytes y obtengo el resultado como un array de bytes
+		const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+		// * transformo el array de bytes en un array de números
+		const hashArray = Array.from(new Uint8Array(hashBuffer));
+		// * convierto el array de números en una cadena hexadecimal
+		const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+
+		return hashHex;
+	}
+
+	async function getDataLogin(event) {
 		event.preventDefault()
 		const formdata = new FormData(form_login)
 		const data = Object.fromEntries(formdata);
-		sendfromServer(data);
+		data.password = await calcularHashSHA256(data.password)
+		sendDataLogin(data);
 
 	}
 
-	async function sendfromServer(data) {
+	async function sendDataLogin(data) {
 
 		try {
 			let object_config = {
@@ -73,7 +100,6 @@
 			}
 			span.textContent = result.message
 			sessionExist = result.session.name
-			console.log(result)
 		} catch (error) {
 
 			result.textContent = error.message
@@ -83,15 +109,59 @@
 	}
 
 
-	function getDataLogout(event) {
+
+	async function getDataRegister(event) {
+
 		event.preventDefault()
-		const formdata = new FormData(form_logout)
-		const data = Object.fromEntries(formdata);
-		sendfromServer2(data);
+		const formdata = new FormData(form_register)
+		const data = Object.fromEntries(formdata)
+
+		data.password = await calcularHashSHA256(data.password)
+		sendDataRegister(data)
 
 	}
 
-	async function sendfromServer2(data) {
+	async function sendDataRegister(data) {
+		try {
+
+			const object_config = {
+
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(data)
+
+			}
+
+			const response = await fetch(`/register`, object_config)
+
+			const result = await response.json()
+
+			if (!response.ok) {
+
+				throw new Error(result.error || result.message)
+
+			}
+
+			span.textContent = result.message
+			console.log(result)
+
+		} catch (error) {
+
+			result.textContent = error.message
+		}
+
+	}
+
+	async function getDataLogout(event) {
+		event.preventDefault()
+		const formdata = new FormData(form_logout)
+		const data = Object.fromEntries(formdata);
+		data.password = await calcularHashSHA256(data.password)
+		sendDataLogout(data);
+
+	}
+
+	async function sendDataLogout(data) {
 
 
 		try {
@@ -172,6 +242,7 @@
 
 
 	function main() {
+		form_register.onsubmit = getDataRegister
 		form_login.onsubmit = getDataLogin;
 		form_logout.onsubmit = getDataLogout;
 

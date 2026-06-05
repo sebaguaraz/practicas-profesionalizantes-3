@@ -256,18 +256,6 @@ function getsayBye_handler(request, response) {
 }
 
 
-// function default_handler(request, response) {
-//     try {
-//         const html = readFileSync(config.server.default_path, 'utf-8');
-//         response.writeHead(200, { 'Content-Type': 'text/html' });
-//         response.end(html);
-//     }
-//     catch (error) {
-//         response.writeHead(500);
-//         response.end('Error interno: No se pudo cargar la vista principal.');
-//     }
-// }
-
 // Manejadores
 async function login_handler(request, response) {
 
@@ -426,7 +414,6 @@ function isPublicPath(path) {
 
 // Ruteo
 let router = new Map();
-// router.set('/', default_handler);
 router.set('/login', login_handler);
 router.set('/logout', logout_handler);
 router.set('/register', register_handler);

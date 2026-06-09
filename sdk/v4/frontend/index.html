@@ -12,27 +12,27 @@
 	<h1>Registro de usuario</h1>
 	<form id="form-register">
 		<label>Usuario:</label>
-		<input name="username" required><br>
+		<input name="username" autocomplete="username" required><br>
 		<label>Password:</label>
-		<input type="password" name="password" required><br>
+		<input type="password" name="password" autocomplete="new-password" required><br>
 		<button type="submit">Registrar usuario</button>
 	</form>
 
 	<h1>Login de usuarios</h1>
 	<form id="form-login">
 		<label>Usuario:</label>
-		<input name="username" required><br>
+		<input name="username" autocomplete="username" required><br>
 		<label>Password:</label>
-		<input type="password" name="password" required><br>
+		<input type="password" name="password" autocomplete="current-password" required><br>
 		<button type="submit">Logear usuario</button>
 	</form>
 
 	<h2>Logout </h2>
 	<form id="form-logout">
 		<label>Usuario:</label>
-		<input name="username" required><br>
+		<input name="username" autocomplete="username" required><br>
 		<label>Password:</label>
-		<input name="password" type="password" placeholder="###"><br>
+		<input name="password" type="password" autocomplete="current-password" placeholder="###"><br>
 		<button type="submit">cerrar sesion</button>
 	</form>
 
@@ -102,6 +102,7 @@
 			}
 			span.textContent = result.message
 			sessionExist = result.session.name
+			console.log("su session.name obtenido es: ", sessionExist)
 		} catch (error) {
 
 			result.textContent = error.message
@@ -196,12 +197,14 @@
 		event.preventDefault()
 
 		const config = {
-			method: "GET"
+			method: "GET",
+			headers: { "x-api-key": sessionExist }
+
 		}
 
 		try {
 
-			const response = await fetch(`http://localhost:${PORT}/log?username=${sessionExist}`, config)
+			const response = await fetch(`http://localhost:${PORT}/log`, config)
 			const result = await response.json()
 			if (!response.ok) {
 				throw new Error(result.message || result.error)
@@ -222,11 +225,13 @@
 		event.preventDefault()
 
 		const config = {
-			method: "GET"
+			method: "GET",
+			headers: { "x-api-key": sessionExist }
+
 		}
 
 		try {
-			const response = await fetch(`http://localhost:${PORT}/sayHello?username=${sessionExist}`, config)
+			const response = await fetch(`http://localhost:${PORT}/sayHello`, config)
 			const result = await response.json()
 			if (!response.ok) {
 				throw new Error(result.message || result.error)

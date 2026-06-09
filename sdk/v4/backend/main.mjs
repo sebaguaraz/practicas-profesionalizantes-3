@@ -26,7 +26,7 @@ function load_config() {
     try {
         const data = readFileSync('./config.json', 'utf-8');
         config = JSON.parse(data);
-        console.log("ConfiguraciÃ³n cargada correctamente.");
+        console.log("Configuracion cargada correctamente.");
     }
     catch (error) {
         console.error("Error cargando config.json. Usando valores por defecto.");
@@ -429,7 +429,7 @@ router.set("/sayBye", getsayBye_handler)
 async function request_dispatcher(request, response) {
 
     response.setHeader('Access-Control-Allow-Origin', '*');
-    response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    response.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
     response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
 
     if (request.method === 'OPTIONS') {
@@ -455,10 +455,8 @@ async function request_dispatcher(request, response) {
         return handler(request, response)
     }
 
-    const data = Object.fromEntries(url.searchParams);
-    console.log(data)
-
-    let { username } = data
+    const username = request.headers["x-api-key"]
+    console.log("obtener session.name del encabezado de la peticion: ", username)
 
     // * debo validar si tiene una sesion REGISTRADA-ACTIVA en el sistema sino debe loguearse de vuelta
     const existSession = userSessions.get(username)

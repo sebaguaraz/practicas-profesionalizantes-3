@@ -3,6 +3,8 @@ import { URL } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { resolve } from 'node:path';
+import { error } from 'node:console';
+import { throws } from 'node:assert/strict';
 
 function default_config() {
     const config =
@@ -66,6 +68,44 @@ class UserSession {
 
 }
 
+
+// * HTTP 401
+class ErrorAuthentication {
+    constructor(object) {
+        this.data = object
+        this.type = "ErrorAuthentication"
+    }
+
+    getError() {
+        return this.data
+    }
+}
+
+// * HTTP 400
+class ErrorSpecification {
+    constructor(object) {
+        this.data = object
+        this.type = "ErrorSpecification"
+    }
+
+    getError() {
+        return this.data
+    }
+}
+
+// * HTTP 422
+class ErrorDomain {
+    constructor(object) {
+        this.data = object
+        this.type = "ErrorDomain"
+
+    }
+
+    getError() {
+        return this.data
+    }
+}
+
 // * valida la autenticacion osea si es quien dice ser, devuelve true o false si existe o no
 function authenticate(username, password) {
     const sql = "SELECT * FROM `user` WHERE username=? AND password=?";
@@ -112,54 +152,64 @@ function authorize(username, path) {
 
 // * delega la autenticacion(osea si es quien dice ser) y crea el objeto SESION si es la 1ra vez q entra u obtiene el objeto SESION si ya lo tiene guardado
 function login(username, password) {
+
     if (!username || !password) {
-        return { status: 400, error: "campos vacios, son obligatorios" }
+        const err = new ErrorSpecification({ exception: "FALTAN_PARAMETROS", detail: ["Faltan credenciales de autenticacion"] });
+
+        throw err
+
     }
+
+    let isAuthenticated = null;
 
     try {
 
-        const isAuthenticated = authenticate(username, password);
+        isAuthenticated = authenticate(username, password);
         // * si esta autenticado pregunta si tiene una sesion guardada, sino la crea en el momento. Si no esta autenticado sale de la funcion
 
-        if (isAuthenticated) {
-            // * si tiene una sesion guardada entra, sino crea una
-            let havePreviousSession = userSessions.get(username.trim());
+    } catch (err) {
 
-            if (!havePreviousSession) {
+        throw { exception: "ERROR_INTERNO_SERVIDOR", detail: [err.message] };
 
-                //* Significa que esta ingresando por primera vez. Entonces, creo y persisto el objeto de sesiÃ³n
-                let newSession = new UserSession(username);
-                newSession.status = 'enabled';
-                userSessions.set(username, newSession);
-                return {
-                    status: 200,
-                    message: `${newSession.name} se creo su sesion por 1ra vez, status: ${newSession.status}`,
-                    session: newSession
-                };
+    }
 
-            }
+    if (isAuthenticated) {
+        // * si tiene una sesion guardada entra, sino crea una
+        let havePreviousSession = userSessions.get(username.trim());
 
-            //* Significa que ya ingreso en algun momento y tiene ya un objeto de sesion creado y guardado en el mapa.
-            if (havePreviousSession.status == 'disabled') {
-                havePreviousSession.status = 'enabled';
-            }
+        if (!havePreviousSession) {
 
+            //* Significa que esta ingresando por primera vez. Entonces, creo y persisto el objeto de sesion
+            let newSession = new UserSession(username);
+            newSession.status = 'enabled';
+            userSessions.set(username, newSession);
             return {
-                status: 200,
-                message: `${havePreviousSession.name} se obtuvo su sesion anterior, status: ${havePreviousSession.status}`,
-                session: havePreviousSession
+                name: newSession.name,
+                status: newSession.status,
+                session: newSession
             };
 
         }
-        else {
-            return { status: 401, error: "Credenciales incorrectas, no autenticado" };
+
+        //* Significa que ya ingreso en algun momento y tiene ya un objeto de sesion creado y guardado en el mapa.
+        if (havePreviousSession.status == 'disabled') {
+            havePreviousSession.status = 'enabled';
         }
 
+        return {
+            status: havePreviousSession.status,
+            name: havePreviousSession.name,
+            session: havePreviousSession
+        };
 
-
-    } catch (err) {
-        return { status: 500, error: err.message }
     }
+    else {
+        const err = new ErrorAuthentication({ exception: "PERMISOS_INVALIDOS", detail: ["Credenciales incorrectas, no autenticado"] });
+        throw err
+    }
+
+
+
 
 }
 
@@ -168,14 +218,20 @@ function logout(username, password) {
     // * se debe autenticar antes de modificar el estado de la sesion porque sino cualquiera que tenga mi USERNAME puede cerrarme la sesion. EN CAMBIO, necesita mi PASSWORD para hacer LOGOUT
     let isAuthenticated = authenticate(username, password);
     if (!isAuthenticated) {
-        return { status: 400, message: "No esta autenticado para hacer logout, debe hacer login" }
+
+        const err = new ErrorAuthentication({ exception: "SIN_PERMISOS_PARA_LOGOUT", detail: ["No esta autenticado para hacer logout, debe hacer login"] });
+        throw err
+
     }
     let currentSession = userSessions.get(username);
     if (!currentSession) {
-        return { status: 400, message: "No tiene una sesion registrada, debe autenticarse" }
+
+        const err = new ErrorAuthentication({ exception: "SIN_SESION_REGISTRADA ", detail: ["No tiene una sesion registrada, debe autenticarse"] });
+        throw err
+
     }
     currentSession.status = 'disabled';
-    return { status: 200, message: "Usted ha cerrado la sesion" }
+    return { name: currentSession.name, status: currentSession.status, session: currentSession }
 
 }
 
@@ -187,14 +243,12 @@ async function createUser(db, username, password) {
         const stmt = db.prepare(sql);
         const row = stmt.get(username, password);
 
-        const result =
-        {
+        return {
             id: row.id,
             username: username,
             password: password
         };
 
-        return result;
     }
     catch (err) {
         throw err;
@@ -207,9 +261,9 @@ async function createUser(db, username, password) {
 // * ***************** HANDLERS *******************
 function getPrint_handler(request, response) {
 
-    if (request.method === "GET") {
+    if (request.method === "POST") {
         response.writeHead(200, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify({ status: 200, message: "ejecutando /Print" }));
+        response.end(JSON.stringify({ message: "ejecutando /Print" }));
 
     }
 
@@ -217,9 +271,9 @@ function getPrint_handler(request, response) {
 
 function getLog_handler(request, response) {
 
-    if (request.method === "GET") {
+    if (request.method === "POST") {
         response.writeHead(200, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify({ status: 200, message: "ejecutando /log" }));
+        response.end(JSON.stringify({ message: "ejecutando /log" }));
 
     }
 
@@ -227,9 +281,9 @@ function getLog_handler(request, response) {
 
 function getHelp_handler(request, response) {
 
-    if (request.method === "GET") {
+    if (request.method === "POST") {
         response.writeHead(200, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify({ status: 200, message: "ejecutando /Help" }));
+        response.end(JSON.stringify({ message: "ejecutando /Help" }));
 
     }
 
@@ -237,9 +291,9 @@ function getHelp_handler(request, response) {
 
 function getsayHello_handler(request, response) {
 
-    if (request.method === "GET") {
+    if (request.method === "POST") {
         response.writeHead(200, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify({ status: 200, message: "ejecutando /sayHello" }));
+        response.end(JSON.stringify({ message: "ejecutando /sayHello" }));
 
     }
 
@@ -247,9 +301,9 @@ function getsayHello_handler(request, response) {
 
 function getsayBye_handler(request, response) {
 
-    if (request.method === "GET") {
+    if (request.method === "POST") {
         response.writeHead(200, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify({ status: 200, message: "ejecutando /sayBye" }));
+        response.end(JSON.stringify({ message: "ejecutando /sayBye" }));
 
     }
 
@@ -274,12 +328,35 @@ async function login_handler(request, response) {
                 // 4. Procesamos el login
                 const output = login(input.username, input.password); //El resultado es un mensaje o un objeto de sesion
 
-                response.writeHead(output.status, { 'Content-Type': 'application/json' });
+                response.writeHead(200, { 'Content-Type': 'application/json' });
                 response.end(JSON.stringify(output));
             }
             catch (err) {
-                response.writeHead(400, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify({ error: 'Formato JSON invÃ¡lido' }));
+
+                let codeStatus = null
+                let message = null
+                switch (err.type) {
+                    case "ErrorAuthentication":
+                        codeStatus = 401;
+                        message = err.getError()
+                        break;
+                    case "ErrorSpecification":
+                        codeStatus = 400;
+                        message = err.getError()
+                        break;
+                    case "ErrorDomain":
+                        codeStatus = 422
+                        message = err.getError()
+                        break;
+
+                    default:
+                        codeStatus = 500
+                        message = { exception: "ERROR_INTERNO_SERVIDOR", detail: [err.message] }
+                        break;
+                }
+
+                response.writeHead(codeStatus, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify(message));
             }
         });
     }
@@ -290,7 +367,7 @@ async function login_handler(request, response) {
 
 
 function logout_handler(request, response) {
-    if (request.method == "POST") {
+    if (request.method === "POST") {
         let body = '';
 
         request.on('data', chunk => {
@@ -304,13 +381,41 @@ function logout_handler(request, response) {
                 const { username, password } = data
 
                 const output = logout(username, password)
-                response.writeHead(output.status, { 'Content-Type': 'application/json' })
+                response.writeHead(200, { 'Content-Type': 'application/json' })
                 response.end(JSON.stringify(output));
 
             }
             catch (err) {
-                response.writeHead(400, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify({ error: err.message }));
+
+                let codeStatus = null
+                let message = null
+                switch (err.type) {
+                    case "ErrorAuthentication":
+                        codeStatus = 401;
+                        message = err.getError()
+
+                        break;
+                    case "ErrorSpecification":
+                        codeStatus = 400;
+                        message = err.getError()
+
+                        break;
+                    case "ErrorDomain":
+                        codeStatus = 422
+                        message = err.getError()
+
+                        break;
+                    default:
+                        codeStatus = 500
+                        message = { exception: "ERROR_INTERNO_SERVIDOR", detail: [err.message] }
+
+                        break;
+                }
+
+
+                response.writeHead(codeStatus, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify(message));
+
             }
         });
     }
@@ -334,14 +439,28 @@ async function register_handler(request, response) {
                 console.log(data)
                 const { username, password } = data
 
-                const output = await createUser(db, username, password);
+                if (!username || !password) {
+                    response.writeHead(400, { 'Content-Type': 'application/json' });
+                    return response.end(JSON.stringify({
+                        exception: "DATOS_INVALIDOS",
+                        detail: ["Faltan campos"]
+                    }));
+                }
 
+                const output = await createUser(db, username, password);
+                console.log(output)
                 response.writeHead(200, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify({ output, message: "Usuario registrado correctamente" }));
+                response.end(JSON.stringify({ username: output.username }));
             }
             catch (err) {
                 response.writeHead(500);
-                response.end(JSON.stringify({ error: err.message }));
+                response.end(JSON.stringify(
+                    {
+                        exception: "ERROR_INTERNO_SERVIDOR",
+                        detail: [err.message]
+                    }
+
+                ));
             }
 
         });
@@ -350,31 +469,6 @@ async function register_handler(request, response) {
 
 }
 
-
-async function getUser_handler(request, response) {
-    //Caso GET
-    if (request.method === "GET") {
-
-        const url = new URL(request.url, 'http://' + config.server.ip);
-        const input = Object.fromEntries(url.searchParams);
-
-        let username = input.username
-
-        let havePreviousSession = userSessions.get(username.trim());
-
-        try {
-
-            response.writeHead(200, { 'Content-Type': 'application/json' });
-            response.end(JSON.stringify(havePreviousSession));
-        }
-        catch (err) {
-            response.writeHead(500);
-            response.end(JSON.stringify({ error: err.message }));
-        }
-
-
-    }
-}
 function isPublicPath(path) {
     try {
         const stmtEndpoint = db.prepare(`
@@ -414,23 +508,39 @@ function isPublicPath(path) {
 
 // Ruteo
 let router = new Map();
-router.set('/login', login_handler);
-router.set('/logout', logout_handler);
-router.set('/register', register_handler);
-router.set("/getUser", getUser_handler);
+router.set('/Login', login_handler);
+router.set('/Logout', logout_handler);
+router.set('/Register', register_handler);
 
-
-router.set("/print", getPrint_handler)
-router.set("/log", getLog_handler)
-router.set("/help", getHelp_handler)
-router.set("/sayHello", getsayHello_handler)
-router.set("/sayBye", getsayBye_handler)
+router.set("/Print", getPrint_handler)
+router.set("/Log", getLog_handler)
+router.set("/Help", getHelp_handler)
+router.set("/SayHello", getsayHello_handler)
+router.set("/SayBye", getsayBye_handler)
 
 async function request_dispatcher(request, response) {
 
+    //* 1. Por cada petición que envía el frontend, el navegador primero, por política de seguridad CORS,
+    //*   envía una petición de prueba con METHOD OPTIONS para validar si el backend permite recibir
+    //*   peticiones desde otros orígenes.
+
+    //* 2. El backend recibe el OPTIONS y DEBE RESPONDER con:
+    //*    - Estado 204 (No Content)
+    //*    - Cabeceras CORS indicando qué orígenes, métodos y headers personalizados permite.
+    //*    - Hacer RETURN para no ejecutar el resto del código.
+
+    //* 3. El navegador INTERPRETA esa respuesta:
+    //*    - Si las cabeceras son correctas (permiten el origen, método y headers) → el navegador
+    //*      ENVÍA la petición real (GET, POST, etc.).
+    //*    - Si NO son correctas → el navegador BLOQUEA y el frontend recibe error CORS.
+
+    //* 4. En CADA petición real (GET, POST, etc.) que llega al backend, el backend DEBE enviar
+    //*    NUEVAMENTE las cabeceras CORS en la respuesta.
+    //*    El navegador las interpreta y si son correctas, el frontend recibe los datos.
+    //*    Si el backend no envía las cabeceras CORS o no son correctas, el navegador bloquea.
     response.setHeader('Access-Control-Allow-Origin', '*');
-    response.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
-    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    response.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key, x-api-version');
+    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
 
     if (request.method === 'OPTIONS') {
         response.writeHead(204);
@@ -443,10 +553,34 @@ async function request_dispatcher(request, response) {
     const path = url.pathname;
     const handler = router.get(path);
 
+    const API_VERSION = request.headers['x-api-version'];
+
+    if (API_VERSION != '1.0') {
+
+        response.writeHead(400, { 'Content-Type': 'application/json' })
+        return response.end(JSON.stringify(
+            {
+
+                exception: "VERSION_API_INVALIDA",
+                detail: ["Version de API incorrecta"]
+            }
+        ));
+        return;
+
+    }
+
+
+
 
     if (!handler) {
-        response.writeHead(400);
-        response.end("Ruta no encontrada");
+        response.writeHead(400, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify(
+            {
+
+                exception: "RUTA_NO_ENCONTRADA",
+                detail: ["Ruta no encontrada"]
+            }
+        ));
         return;
     }
 
@@ -461,24 +595,27 @@ async function request_dispatcher(request, response) {
     // * debo validar si tiene una sesion REGISTRADA-ACTIVA en el sistema sino debe loguearse de vuelta
     const existSession = userSessions.get(username)
     if (!existSession || existSession.status == "disabled") {
-        response.writeHead(400, { 'Content-Type': 'application/json' })
-        response.end(JSON.stringify({ error: 'No se encuentra su sesion o esta inactiva, debe loguearse de vuelta' }));
+        response.writeHead(401, { 'Content-Type': 'application/json' })
+        response.end(JSON.stringify(
+            {
+                exception: 'SIN_SESION_REGISTRADA_O_INACTIVA', detail: ['No se encuentra su sesion o esta inactiva, debe loguearse de vuelta']
+            }
+        ));
         return
     }
 
     const result = authorize(username, path)
     if (!result) {
-        response.writeHead(400, { 'Content-Type': 'application/json' })
-        response.end(JSON.stringify({ error: 'No autorizado para ejecutar ese endpoint' }));
+        response.writeHead(401, { 'Content-Type': 'application/json' })
+        response.end(JSON.stringify(
+            {
+                exception: 'NO_AUTORIZADO_PARA_EJECUTAR_ENDPOINT', detail: ['No autorizado para ejecutar ese endpoint']
+            }
+        ));
         return
     }
 
     return handler(request, response)
-
-
-
-
-
 
 
 

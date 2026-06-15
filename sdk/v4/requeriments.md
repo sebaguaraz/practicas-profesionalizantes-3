@@ -70,3 +70,55 @@ fetch('http://localhost:8080/printDocument&#39;,
 Consigna:
 -Modificar las peticiones del frontend de modo tal que pasen siempre esta información por cabeceras y nunca por el cuerpo JSON.
 -Modificar el backend para que la lógica de autenticación consuma los datos de las cabeceras y no desde el cuerpo de las peticiones
+
+3. Uniformización del uso del protocolo para WebAPI's estables
+
+Problema: Cuando uno diseña API's para la web, uno se enfrenta al uso del protocolo HTTP en toda su dimensión. Dada su enorme flexibilidad, posibilita que muchas cuestiones que hacen a la comunicación entre cliente y servidor, se puedan realizar de muchas maneras y formas. Dependiendo el "estilo" de API que nosotros diseñamos, uno lo que trata de hacer es "acotar" y/o "limitar" el gran espectro de formas de trabajo a un conjunto manejable de reglas. Sin embargo, hasta este punto, tuvimos importante libertad para determinar de qué manera pasamos información, si va por el cuerpo, si no va por ruta, si se usan cabeceras, cuántas cabeceras y algo relevante, también el código de estado que se responde a las peticiones. Dentro de las WebAPI's existen hoy en día 2 enfoques principales. El estilo RPC y el estilo REST. Ambos resultan útiles, sin embargo, todo depende del contexto.
+
+Diferencias entre RPC y REST
+
+REST (Representational State Transfer): Se piensa en Recursos ("sustantivos"). Un recurso puede ser un usuario, un producto o un comentario, no importa. Uno debe pensar en que los recursos están "organizados" en alguna estructura. Como por ejemplo: Archivos y Carpetas, y hace operaciones válidas en ese contexto sobre ellos: "Crear", "Borrar", "Copiar", "Modificar".
+
+RPC (Remote Procedure Call): Se piensa en Acciones ("verbos"). Uno simplemente debe pensar en que va a "ejecutar una función, método y/o procedimiento" que está en otro lugar ejecutándose. El diseñador de la WebAPI decide qué nombre tiene la acción y cómo se lleva a cabo.
+
+¿Cómo usan el protocolo HTTP cada uno?
+En REST el protocolo se exprime al máximo. Todos los métodos de envío ( GET; POST; PUT; DELETE; ... ) corresponden a una operación concreta sobre un recurso. GET : Leer, POST: Crear, PUT: Editar, DELETE: Borrar... y los códigos de estado de respuesta del protocolo indican concretamente "Qué pasó" con la petición. 
+Códigos 100: Procesamiento por etapas
+Códigos 200: Respuesta satisfactorias
+Códigos 300: Redirecciones de recursos
+Códigos 400: Problemas para localizar recursos
+Códigos 500: Fallas de infraestructura
+El diseñador de la WebAPI tipo REST debe adherir lo más fiel a todo el protocolo para que su WebAPI funcione de manera natural y orgánica. Conlleva bastante trabajo tener una API REST funcional y testeada.
+
+En RPC el protocolo sólo se utiliza como un "puente de comunicación" entre el cliente y el servidor. Nada más. No importa qué método de envío se utiliza y los códigos de estado se utilizan para indicar principalmente cuestiones vinculadas a "qué pasó en la comunicación". En este sentido, el enfoque RPC es mucho más minimalista. Sin embargo, conlleva a que el diseñador tome varias decisiones sobre qué usar del protocolo, cómo usarlo y qué descartar.
+
+Ventajas y desventajas
+El estilo REST es un tipo de WebAPI que se popularizó mucho en estos últimos años. Sin embargo, popularidad no es sinónimo de adecuado en cualquier situación. Sus mayores ventajas son: "Predicibilidad". Alguien que solo conoce el protocolo HTTP, puede interactuar con cualquier API tipo REST de forma genérica. Por lo tanto la documentación puede ser más simple o predecible. La más importante, es que se lleva muy bien para WebAPI's muy posicionadas en el intercambio de datos/información. Su desventaja es que conlleva muchísimo trabajo tener una WebAPI completamente funcional, dado que el protocolo HTTP tiene una enorme cantidad de posibilidades que deben tenerse en cuenta y la más importante es que cualquier tipo de operación que se necesite que se salga de las operaciones (Leer, Crear, Editar, Borrar) o no se pueda mapear correctamente en estas pocas operaciones, empieza a romper considerablemente el diseño.
+
+El estilo RPC, es un estilo más clásico. Su mayor ventaja es la simplicidad y rango total de cobertura de funcionalidades. Permite mapear y conectar fácilmente aplicaciones cliente/servidor utilizando una fracción muy reducida del protocolo HTTP. Las WebAPIS RPC pasan a ser muy similares a una lógica de programación estructurada clásica. Su desventaja es que conlleva a tomar decisiones sobre qué dejar fuera/adoptar protocolo y requiere documentar más estas decisiones hacia los desarrolladores. Para arquitecturas que están muy basadas en intercambio de datos, la WebAPI tipo RPC suele ser algo más extensa dado que cada operación se traduce en una función puntual. Sin embargo, no corrompe la estructura general otorgándole estabilidad.
+
+Formas de uso
+En nuestra materia nosotros utilizaremos RPC dado que es el mejor equilibrio entre diseño, abordaje del protocolo y capacidades. Sin embargo, hay decisiones que deberemos tomar que como se mencionó anteriormente, deben ser explícitas y argumentadas para que sean estables en los desarrollos. Los criterios que tomaremos son los siguientes:
+
+Toda la información que corresponde a los datos necesarios para una función, método y/o procedimiento. Viajan por método de envío POST sin excepción. 
+Toda información considerada liviana (no archivos) enviada por POST se envía utilizando siempre un único formato de serialización. (JSON).
+La acción concreta a ejecutar viene proporcionada por el PATH de la URL. Escrita en CamelCase.
+
+No se utilizan todos los códigos de estado para todos los casos, se adopta la siguiente regla:
+101: Permiso provisional para el envío de una petición. (Uso para cuerpos pesados)
+200: Petición válida y procesada satisfactoriamente (Estándar)
+202: Petición válida y aceptada para procesamiento posterior (Devuelve un ID de trabajo)
+400: Notificación de error de uso en la especificación. (Envían mal el cuerpo, ruta, parámetros, tipos, etc)
+401: Notificación de error por falta de permisos (Acceso inválido)
+422: Notificación de error del dominio de la aplicación (Excepción del dominio: Ej: 'Fondo insuficiente').
+500: Error al procesar la solicitud (Problemas graves: Excepciones, Fallas internas)
+Siempre que hay respuestas satisfactorias, las funciones retornan y devuelven la estructura de dato que corresponda según la función. En caso de errores (400,401,422), se sustituye siempre la respuesta por la siguiente:
+{ exception: 'value', detail: [a,b,c,d] }     
+Siempre que las peticiones se resuelvan en tiempos diferidos y estas devuelvan (202). La estructura de respuesta es: {  taskId: 'id' } . Con lo cual, se exige la existencia de una función de consulta de estado para estos casos.
+La información de control de acceso viaja a través de la cabecera estándar:  Authorization
+y su valor es un string con el siguiente contenido:   Bearer Key   ej:
+
+Authorization: 'Bearer 133ee989293f92736... '
+Una cabecera adicional denotará la versión de la WebAPI: X-API-Version: '1.0'
+Consigna
+A partir de la solución del punto 2. Refactorizar el proyecto aplicando las siguientes reglas de uso para conformar una WebAPI RPC estable. (El único punto que no debe considerar es el cambio de cabecera para la autorización). Debe seguir conservando por ahora el planteado en el punto 2.

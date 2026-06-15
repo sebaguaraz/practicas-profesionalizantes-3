@@ -23,7 +23,7 @@
 		<label>Usuario:</label>
 		<input name="username" autocomplete="username" required><br>
 		<label>Password:</label>
-		<input type="password" name="password" autocomplete="current-password" required><br>
+		<input type="password" name="password" required><br>
 		<button type="submit">Logear usuario</button>
 	</form>
 
@@ -32,7 +32,7 @@
 		<label>Usuario:</label>
 		<input name="username" autocomplete="username" required><br>
 		<label>Password:</label>
-		<input name="password" type="password" autocomplete="current-password" placeholder="###"><br>
+		<input name="password" type="password" placeholder="###"><br>
 		<button type="submit">cerrar sesion</button>
 	</form>
 
@@ -55,6 +55,8 @@
 	const btnGetHello = document.getElementById('btnGetHello');
 
 	let sessionExist = null
+	const APIVersion = "1.0"
+
 
 	// Función para calcular el hash SHA-256 de una cadena
 	async function calcularHashSHA256(cadena) {
@@ -87,25 +89,27 @@
 			let object_config = {
 
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers: { "Content-Type": "application/json", "x-api-version": APIVersion },
 				body: JSON.stringify(data)
 			}
 
-			const response = await fetch(`http://localhost:${PORT}/login`, object_config)
+			const response = await fetch(`http://localhost:${PORT}/Login`, object_config)
 
 			const result = await response.json()
 
 			if (!response.ok) {
 
-				throw new Error(result.error || result.message)
+				console.log(result)
+				throw new Error(result.detail[0])
 
 			}
-			span.textContent = result.message
+			span.textContent = `Usuario ${result.name} ah sido logueado con exito`
 			sessionExist = result.session.name
-			console.log("su session.name obtenido es: ", sessionExist)
+			console.log(result)
+
 		} catch (error) {
 
-			result.textContent = error.message
+			span.textContent = error.message
 		}
 
 
@@ -120,7 +124,7 @@
 		const data = Object.fromEntries(formdata)
 
 		data.password = await calcularHashSHA256(data.password)
-		sendDataRegister(data)
+		await sendDataRegister(data)
 
 	}
 
@@ -130,27 +134,26 @@
 			const object_config = {
 
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers: { "Content-Type": "application/json", "x-api-version": APIVersion },
 				body: JSON.stringify(data)
 
 			}
 
-			const response = await fetch(`http://localhost:${PORT}/register`, object_config)
+			const response = await fetch(`http://localhost:${PORT}/Register`, object_config)
 
 			const result = await response.json()
 
 			if (!response.ok) {
 
-				throw new Error(result.error || result.message)
+				console.log(result)
+				throw new Error(result.detail[0])
 
 			}
-
-			span.textContent = result.message
-			console.log(result)
+			span.textContent = `Usuario ${result.username} ah sido registrado con exito`
 
 		} catch (error) {
 
-			result.textContent = error.message
+			span.textContent = error.message
 		}
 
 	}
@@ -171,21 +174,22 @@
 			let object_config = {
 
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers: { "Content-Type": "application/json", "x-api-version": APIVersion },
 				body: JSON.stringify(data)
 
 			}
-			const response = await fetch(`http://localhost:${PORT}/logout`, object_config)
+			const response = await fetch(`http://localhost:${PORT}/Logout`, object_config)
 
 			const result = await response.json()
 
 			if (!response.ok) {
 
-				throw new Error(result.message)
+				console.log(result)
+				throw new Error(result.detail[0])
 
 			}
-			span.textContent = result.message
-			return
+			span.textContent = `Usuario ${result.name} ah sido deslogueado con exito`
+			console.log(result)
 		} catch (error) {
 			span.textContent = error.message
 		}
@@ -197,20 +201,23 @@
 		event.preventDefault()
 
 		const config = {
-			method: "GET",
-			headers: { "x-api-key": sessionExist }
+			method: "POST",
+			headers: { "x-api-key": sessionExist, "Content-Type": "application/json", "x-api-version": APIVersion },
+			body: JSON.stringify({})
 
 		}
 
 		try {
 
-			const response = await fetch(`http://localhost:${PORT}/log`, config)
+			const response = await fetch(`http://localhost:${PORT}/Log`, config)
 			const result = await response.json()
 			if (!response.ok) {
-				throw new Error(result.message || result.error)
+				console.log(result)
+				throw new Error(result.detail[0])
 			}
 
 			span.textContent = result.message
+			console.log(result)
 
 
 		} catch (error) {
@@ -225,22 +232,26 @@
 		event.preventDefault()
 
 		const config = {
-			method: "GET",
-			headers: { "x-api-key": sessionExist }
+			method: "POST",
+			headers: { "x-api-key": sessionExist, "Content-Type": "application/json", "x-api-version": APIVersion },
+			body: JSON.stringify({})
 
 		}
 
 		try {
-			const response = await fetch(`http://localhost:${PORT}/sayHello`, config)
+			const response = await fetch(`http://localhost:${PORT}/SayHello`, config)
 			const result = await response.json()
+
+
 			if (!response.ok) {
-				throw new Error(result.message || result.error)
+				console.log(result)
+				throw new Error(result.detail[0])
 			}
+
+			console.log(result)
 			span.textContent = result.message
 
-
 		} catch (error) {
-			console.log(sessionExist)
 
 			span.textContent = error.message
 		}

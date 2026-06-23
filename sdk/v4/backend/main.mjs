@@ -106,6 +106,19 @@ class ErrorDomain {
     }
 }
 
+// * HTTP 500
+class ErrorInternServer {
+    constructor(object) {
+        this.data = object
+        this.type = "ErrorInternServer"
+
+    }
+
+    getError() {
+        return this.data
+    }
+}
+
 // * valida la autenticacion osea si es quien dice ser, devuelve true o false si existe o no
 function authenticate(username, password) {
     const sql = "SELECT * FROM `user` WHERE username=? AND password=?";
@@ -168,8 +181,8 @@ function login(username, password) {
         // * si esta autenticado pregunta si tiene una sesion guardada, sino la crea en el momento. Si no esta autenticado sale de la funcion
 
     } catch (err) {
-
-        throw { exception: "ERROR_INTERNO_SERVIDOR", detail: [err.message] };
+        const error = new ErrorInternServer({ exception: "ERROR_INTERNO_SERVIDOR", detail: [err.message] })
+        throw error;
 
     }
 
@@ -261,51 +274,37 @@ async function createUser(db, username, password) {
 // * ***************** HANDLERS *******************
 function getPrint_handler(request, response) {
 
-    if (request.method === "POST") {
-        response.writeHead(200, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify({ message: "ejecutando /Print" }));
-
-    }
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ message: "ejecutando /Print" }));
 
 }
 
 function getLog_handler(request, response) {
 
-    if (request.method === "POST") {
-        response.writeHead(200, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify({ message: "ejecutando /log" }));
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ message: "ejecutando /log" }));
 
-    }
 
 }
 
 function getHelp_handler(request, response) {
 
-    if (request.method === "POST") {
-        response.writeHead(200, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify({ message: "ejecutando /Help" }));
-
-    }
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ message: "ejecutando /Help" }));
 
 }
 
 function getsayHello_handler(request, response) {
 
-    if (request.method === "POST") {
-        response.writeHead(200, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify({ message: "ejecutando /sayHello" }));
-
-    }
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ message: "ejecutando /sayHello" }));
 
 }
 
 function getsayBye_handler(request, response) {
 
-    if (request.method === "POST") {
-        response.writeHead(200, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify({ message: "ejecutando /sayBye" }));
-
-    }
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ message: "ejecutando /sayBye" }));
 
 }
 
@@ -313,159 +312,153 @@ function getsayBye_handler(request, response) {
 // Manejadores
 async function login_handler(request, response) {
 
-    if (request.method == "POST") {
-        let body = '';
+    let body = '';
 
-        request.on('data', chunk => {
-            body += chunk.toString();
-        });
+    request.on('data', chunk => {
+        body += chunk.toString();
+    });
 
-        request.on('end', async () => {
-            try {
-                // 3. Convertimos el string a objeto (asumiendo que envi­an JSON)
-                const input = JSON.parse(body);
-                console.log(input)
-                // 4. Procesamos el login
-                const output = login(input.username, input.password); //El resultado es un mensaje o un objeto de sesion
+    request.on('end', async () => {
+        try {
+            // 3. Convertimos el string a objeto (asumiendo que envi­an JSON)
+            const input = JSON.parse(body);
+            console.log(input)
+            // 4. Procesamos el login
+            const output = login(input.username, input.password); //El resultado es un mensaje o un objeto de sesion
 
-                response.writeHead(200, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(output));
+            response.writeHead(200, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify(output));
+        }
+        catch (err) {
+
+            let codeStatus = null
+            let message = null
+            switch (err.type) {
+                case "ErrorAuthentication":
+                    codeStatus = 401;
+                    message = err.getError()
+                    break;
+                case "ErrorSpecification":
+                    codeStatus = 400;
+                    message = err.getError()
+                    break;
+                case "ErrorDomain":
+                    codeStatus = 422
+                    message = err.getError()
+                    break;
+
+                case "ErrorInternServer":
+                    codeStatus = 500
+                    message = err.getError()
+                    break;
             }
-            catch (err) {
 
-                let codeStatus = null
-                let message = null
-                switch (err.type) {
-                    case "ErrorAuthentication":
-                        codeStatus = 401;
-                        message = err.getError()
-                        break;
-                    case "ErrorSpecification":
-                        codeStatus = 400;
-                        message = err.getError()
-                        break;
-                    case "ErrorDomain":
-                        codeStatus = 422
-                        message = err.getError()
-                        break;
-
-                    default:
-                        codeStatus = 500
-                        message = { exception: "ERROR_INTERNO_SERVIDOR", detail: [err.message] }
-                        break;
-                }
-
-                response.writeHead(codeStatus, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(message));
-            }
-        });
-    }
-
+            response.writeHead(codeStatus, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify(message));
+        }
+    });
 
 
 }
 
 
 function logout_handler(request, response) {
-    if (request.method === "POST") {
-        let body = '';
 
-        request.on('data', chunk => {
-            body += chunk.toString();
-        });
+    let body = '';
 
-        request.on('end', async () => {
-            try {
-                const data = JSON.parse(body)
-                console.log(data)
-                const { username, password } = data
+    request.on('data', chunk => {
+        body += chunk.toString();
+    });
 
-                const output = logout(username, password)
-                response.writeHead(200, { 'Content-Type': 'application/json' })
-                response.end(JSON.stringify(output));
+    request.on('end', async () => {
+        try {
+            const data = JSON.parse(body)
+            console.log(data)
+            const { username, password } = data
 
+            const output = logout(username, password)
+            response.writeHead(200, { 'Content-Type': 'application/json' })
+            response.end(JSON.stringify(output));
+
+        }
+        catch (err) {
+
+            let codeStatus = null
+            let message = null
+            switch (err.type) {
+                case "ErrorAuthentication":
+                    codeStatus = 401;
+                    message = err.getError()
+
+                    break;
+                case "ErrorSpecification":
+                    codeStatus = 400;
+                    message = err.getError()
+
+                    break;
+                case "ErrorDomain":
+                    codeStatus = 422
+                    message = err.getError()
+
+                    break;
+                case "ErrorInternServer":
+                    codeStatus = 500
+                    message = err.getError()
+                    break;
             }
-            catch (err) {
-
-                let codeStatus = null
-                let message = null
-                switch (err.type) {
-                    case "ErrorAuthentication":
-                        codeStatus = 401;
-                        message = err.getError()
-
-                        break;
-                    case "ErrorSpecification":
-                        codeStatus = 400;
-                        message = err.getError()
-
-                        break;
-                    case "ErrorDomain":
-                        codeStatus = 422
-                        message = err.getError()
-
-                        break;
-                    default:
-                        codeStatus = 500
-                        message = { exception: "ERROR_INTERNO_SERVIDOR", detail: [err.message] }
-
-                        break;
-                }
 
 
-                response.writeHead(codeStatus, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(message));
+            response.writeHead(codeStatus, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify(message));
 
-            }
-        });
-    }
+        }
+    });
+
 
 }
 
 
 async function register_handler(request, response) {
-    //Caso POST
 
-    if (request.method === "POST") {
-        let body = '';
+    let body = '';
 
-        request.on('data', chunk => {
-            body += chunk.toString();
-        });
+    request.on('data', chunk => {
+        body += chunk.toString();
+    });
 
-        request.on('end', async () => {
-            try {
-                const data = JSON.parse(body);
-                console.log(data)
-                const { username, password } = data
+    request.on('end', async () => {
+        try {
+            const data = JSON.parse(body);
+            console.log(data)
+            const { username, password } = data
 
-                if (!username || !password) {
-                    response.writeHead(400, { 'Content-Type': 'application/json' });
-                    return response.end(JSON.stringify({
-                        exception: "DATOS_INVALIDOS",
-                        detail: ["Faltan campos"]
-                    }));
+            if (!username || !password) {
+                response.writeHead(400, { 'Content-Type': 'application/json' });
+                return response.end(JSON.stringify({
+                    exception: "DATOS_INVALIDOS",
+                    detail: ["Faltan campos"]
+                }));
+            }
+
+            const output = await createUser(db, username, password);
+            console.log(output)
+            response.writeHead(200, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ username: output.username }));
+        }
+        catch (err) {
+            response.writeHead(500);
+            response.end(JSON.stringify(
+                {
+                    exception: "ERROR_INTERNO_SERVIDOR",
+                    detail: [err.message]
                 }
 
-                const output = await createUser(db, username, password);
-                console.log(output)
-                response.writeHead(200, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify({ username: output.username }));
-            }
-            catch (err) {
-                response.writeHead(500);
-                response.end(JSON.stringify(
-                    {
-                        exception: "ERROR_INTERNO_SERVIDOR",
-                        detail: [err.message]
-                    }
+            ));
+        }
 
-                ));
-            }
+    });
 
-        });
 
-    }
 
 }
 
@@ -518,6 +511,10 @@ router.set("/Help", getHelp_handler)
 router.set("/SayHello", getsayHello_handler)
 router.set("/SayBye", getsayBye_handler)
 
+
+
+
+
 async function request_dispatcher(request, response) {
 
     //* 1. Por cada petición que envía el frontend, el navegador primero, por política de seguridad CORS,
@@ -539,87 +536,114 @@ async function request_dispatcher(request, response) {
     //*    El navegador las interpreta y si son correctas, el frontend recibe los datos.
     //*    Si el backend no envía las cabeceras CORS o no son correctas, el navegador bloquea.
     response.setHeader('Access-Control-Allow-Origin', '*');
-    response.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key, x-api-version');
-    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
+    response.setHeader('Access-Control-Allow-Headers', "Content-Type, x-api-key, x-api-version");
+    response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
 
-    if (request.method === 'OPTIONS') {
-        response.writeHead(204);
-        response.end();
-        return;
-    }
+    try {
 
 
-    const url = new URL(request.url, 'http://' + config.server.ip);
-    const path = url.pathname;
-    const handler = router.get(path);
+        if (request.method === 'OPTIONS') {
+            response.writeHead(204);
+            response.end();
+            return;
+        }
 
-    const API_VERSION = request.headers['x-api-version'];
-
-    if (API_VERSION != '1.0') {
-
-        response.writeHead(400, { 'Content-Type': 'application/json' })
-        return response.end(JSON.stringify(
-            {
-
-                exception: "VERSION_API_INVALIDA",
-                detail: ["Version de API incorrecta"]
-            }
-        ));
-        return;
-
-    }
+        if (request.method !== "POST") {
+            response.writeHead(400, { "Content-type": "application/json" })
+            response.end(JSON.stringify(
+                {
+                    exception: "METODO_NO_VALIDO",
+                    detail: ["Metodo de envio no correspondiente para el servidor."]
+                }
+            ))
+            return
+        }
 
 
+        const url = new URL(request.url, 'http://' + config.server.ip);
+        const path = url.pathname;
+        const handler = router.get(path);
+
+        const API_VERSION = request.headers['x-api-version'];
+
+        if (API_VERSION != '1.0') {
+
+            response.writeHead(400, { 'Content-Type': 'application/json' })
+            return response.end(JSON.stringify(
+                {
+
+                    exception: "VERSION_API_INVALIDA",
+                    detail: ["Version de API incorrecta"]
+                }
+            ));
+            return;
+
+        }
 
 
-    if (!handler) {
-        response.writeHead(400, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify(
-            {
+        if (!handler) {
+            response.writeHead(400, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify(
+                {
 
-                exception: "RUTA_NO_ENCONTRADA",
-                detail: ["Ruta no encontrada"]
-            }
-        ));
-        return;
-    }
+                    exception: "RUTA_NO_ENCONTRADA",
+                    detail: ["Ruta no encontrada"]
+                }
+            ));
+            return;
+        }
 
-    if (isPublicPath(path)) {
+        if (isPublicPath(path)) {
+
+            return handler(request, response)
+        }
+
+
+        const username = request.headers["x-api-key"]
+
+        // * debo validar si tiene una sesion REGISTRADA-ACTIVA en el sistema sino debe loguearse de vuelta
+        const existSession = userSessions.get(username)
+        if (!existSession || existSession.status == "disabled") {
+            response.writeHead(401, { 'Content-Type': 'application/json' })
+            response.end(JSON.stringify(
+                {
+                    exception: 'SIN_SESION_REGISTRADA_O_INACTIVA', detail: ['No se encuentra su sesion o esta inactiva, debe loguearse de vuelta']
+                }
+            ));
+            return
+        }
+
+        const result = authorize(username, path)
+        if (!result) {
+            response.writeHead(401, { 'Content-Type': 'application/json' })
+            response.end(JSON.stringify(
+                {
+                    exception: 'NO_AUTORIZADO_PARA_EJECUTAR_ENDPOINT', detail: ['No autorizado para ejecutar ese endpoint']
+                }
+            ));
+            return
+        }
 
         return handler(request, response)
-    }
 
-    const username = request.headers["x-api-key"]
-    console.log("obtener session.name del encabezado de la peticion: ", username)
 
-    // * debo validar si tiene una sesion REGISTRADA-ACTIVA en el sistema sino debe loguearse de vuelta
-    const existSession = userSessions.get(username)
-    if (!existSession || existSession.status == "disabled") {
-        response.writeHead(401, { 'Content-Type': 'application/json' })
+    } catch (error) {
+
+        response.writeHead(500, { 'Content-Type': 'application/json' })
         response.end(JSON.stringify(
             {
-                exception: 'SIN_SESION_REGISTRADA_O_INACTIVA', detail: ['No se encuentra su sesion o esta inactiva, debe loguearse de vuelta']
+                exception: 'ERROR_SERVIDOR', detail: [error.message]
             }
         ));
-        return
+
     }
 
-    const result = authorize(username, path)
-    if (!result) {
-        response.writeHead(401, { 'Content-Type': 'application/json' })
-        response.end(JSON.stringify(
-            {
-                exception: 'NO_AUTORIZADO_PARA_EJECUTAR_ENDPOINT', detail: ['No autorizado para ejecutar ese endpoint']
-            }
-        ));
-        return
-    }
-
-    return handler(request, response)
 
 
 
 }
+
+
 
 function start() {
     console.log('Servidor ejecutandose en http://' + config.server.ip + ':' + config.server.port);

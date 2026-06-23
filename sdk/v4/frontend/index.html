@@ -44,7 +44,6 @@
 
 <script>
 
-	const PORT = 3000
 
 	const span = document.getElementById('result');
 	const form_login = document.getElementById('form-login');
@@ -56,6 +55,44 @@
 
 	let sessionExist = null
 	const APIVersion = "1.0"
+	const PORT = 3000
+	const domain = `http://localhost:${PORT}`
+
+
+	async function RPCApiFetch(path, data) {
+
+		try {
+
+			let object_config = {
+				headers: { "Content-Type": "application/json", "x-api-version": APIVersion, "x-api-key": sessionExist },
+				method: "POST",
+				body: JSON.stringify(data)
+	
+			}
+	
+			let response = await fetch(domain + path, object_config)
+			
+			let result = await response.json()
+
+			if (!response.ok) {
+	
+				throw new Error(result.detail[0] || "Error en el servidor");
+	
+			}
+
+			return result
+	
+
+		} catch (err) {
+
+			throw err
+
+		}
+
+	}
+
+
+
 
 
 	// Función para calcular el hash SHA-256 de una cadena
@@ -86,30 +123,16 @@
 	async function sendDataLogin(data) {
 
 		try {
-			let object_config = {
 
-				method: "POST",
-				headers: { "Content-Type": "application/json", "x-api-version": APIVersion },
-				body: JSON.stringify(data)
-			}
+			const response = await RPCApiFetch("/Login", data)
 
-			const response = await fetch(`http://localhost:${PORT}/Login`, object_config)
+			span.textContent = `Usuario ${response.name} ah sido logueado con exito`
+			sessionExist = response.session.name
+			console.log(response)
 
-			const result = await response.json()
+		} catch (err) {
 
-			if (!response.ok) {
-
-				console.log(result)
-				throw new Error(result.detail[0])
-
-			}
-			span.textContent = `Usuario ${result.name} ah sido logueado con exito`
-			sessionExist = result.session.name
-			console.log(result)
-
-		} catch (error) {
-
-			span.textContent = error.message
+			span.textContent = err.message
 		}
 
 
@@ -129,27 +152,12 @@
 	}
 
 	async function sendDataRegister(data) {
+
 		try {
 
-			const object_config = {
+			const response = await RPCApiFetch(`/Register`, data)
 
-				method: "POST",
-				headers: { "Content-Type": "application/json", "x-api-version": APIVersion },
-				body: JSON.stringify(data)
-
-			}
-
-			const response = await fetch(`http://localhost:${PORT}/Register`, object_config)
-
-			const result = await response.json()
-
-			if (!response.ok) {
-
-				console.log(result)
-				throw new Error(result.detail[0])
-
-			}
-			span.textContent = `Usuario ${result.username} ah sido registrado con exito`
+			span.textContent = `Usuario ${response.username} ah sido registrado con exito`
 
 		} catch (error) {
 
@@ -171,25 +179,11 @@
 
 
 		try {
-			let object_config = {
+			
+			const response = await RPCApiFetch(`/Logout`, data)
 
-				method: "POST",
-				headers: { "Content-Type": "application/json", "x-api-version": APIVersion },
-				body: JSON.stringify(data)
-
-			}
-			const response = await fetch(`http://localhost:${PORT}/Logout`, object_config)
-
-			const result = await response.json()
-
-			if (!response.ok) {
-
-				console.log(result)
-				throw new Error(result.detail[0])
-
-			}
-			span.textContent = `Usuario ${result.name} ah sido deslogueado con exito`
-			console.log(result)
+			span.textContent = `Usuario ${response.name} ah sido deslogueado con exito`
+			console.log(response)
 		} catch (error) {
 			span.textContent = error.message
 		}
@@ -198,26 +192,14 @@
 	}
 
 	async function getLog_handler(event) {
-		event.preventDefault()
-
-		const config = {
-			method: "POST",
-			headers: { "x-api-key": sessionExist, "Content-Type": "application/json", "x-api-version": APIVersion },
-			body: JSON.stringify({})
-
-		}
 
 		try {
 
-			const response = await fetch(`http://localhost:${PORT}/Log`, config)
-			const result = await response.json()
-			if (!response.ok) {
-				console.log(result)
-				throw new Error(result.detail[0])
-			}
+			const response = await RPCApiFetch(`/Log`, {})
 
-			span.textContent = result.message
-			console.log(result)
+			span.textContent = response.message
+
+			console.log(response)
 
 
 		} catch (error) {
@@ -229,27 +211,13 @@
 
 
 	async function getHello_handler(event) {
-		event.preventDefault()
-
-		const config = {
-			method: "POST",
-			headers: { "x-api-key": sessionExist, "Content-Type": "application/json", "x-api-version": APIVersion },
-			body: JSON.stringify({})
-
-		}
 
 		try {
-			const response = await fetch(`http://localhost:${PORT}/SayHello`, config)
-			const result = await response.json()
 
+			const response = await RPCApiFetch(`/SayHello`, {})
 
-			if (!response.ok) {
-				console.log(result)
-				throw new Error(result.detail[0])
-			}
-
-			console.log(result)
-			span.textContent = result.message
+			console.log(response)
+			span.textContent = response.message
 
 		} catch (error) {
 

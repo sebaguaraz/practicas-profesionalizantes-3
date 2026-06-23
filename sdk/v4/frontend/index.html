@@ -59,7 +59,7 @@
 	const domain = `http://localhost:${PORT}`
 
 
-	async function RPCApiFetch(path, data) {
+	async function RPCApiFetchPrivate(path, data) {
 
 		try {
 
@@ -67,21 +67,21 @@
 				headers: { "Content-Type": "application/json", "x-api-version": APIVersion, "x-api-key": sessionExist },
 				method: "POST",
 				body: JSON.stringify(data)
-	
+
 			}
-	
+
 			let response = await fetch(domain + path, object_config)
-			
+
 			let result = await response.json()
 
 			if (!response.ok) {
-	
+
 				throw new Error(result.detail[0] || "Error en el servidor");
-	
+
 			}
 
 			return result
-	
+
 
 		} catch (err) {
 
@@ -92,7 +92,37 @@
 	}
 
 
+	async function RPCApiFetchPublic(path, data) {
 
+		try {
+
+			let object_config = {
+				headers: { "Content-Type": "application/json", "x-api-version": APIVersion },
+				method: "POST",
+				body: JSON.stringify(data)
+
+			}
+
+			let response = await fetch(domain + path, object_config)
+
+			let result = await response.json()
+
+			if (!response.ok) {
+
+				throw new Error(result.detail[0] || "Error en el servidor");
+
+			}
+
+			return result
+
+
+		} catch (err) {
+
+			throw err
+
+		}
+
+	}
 
 
 	// Función para calcular el hash SHA-256 de una cadena
@@ -124,7 +154,7 @@
 
 		try {
 
-			const response = await RPCApiFetch("/Login", data)
+			const response = await RPCApiFetchPublic("/Login", data)
 
 			span.textContent = `Usuario ${response.name} ah sido logueado con exito`
 			sessionExist = response.session.name
@@ -154,8 +184,7 @@
 	async function sendDataRegister(data) {
 
 		try {
-
-			const response = await RPCApiFetch(`/Register`, data)
+			const response = await RPCApiFetchPublic(`/Register`, data)
 
 			span.textContent = `Usuario ${response.username} ah sido registrado con exito`
 
@@ -179,8 +208,8 @@
 
 
 		try {
-			
-			const response = await RPCApiFetch(`/Logout`, data)
+
+			const response = await RPCApiFetchPrivate(`/Logout`, data)
 
 			span.textContent = `Usuario ${response.name} ah sido deslogueado con exito`
 			console.log(response)
@@ -195,7 +224,7 @@
 
 		try {
 
-			const response = await RPCApiFetch(`/Log`, {})
+			const response = await RPCApiFetchPrivate(`/Log`, {})
 
 			span.textContent = response.message
 
@@ -214,7 +243,7 @@
 
 		try {
 
-			const response = await RPCApiFetch(`/SayHello`, {})
+			const response = await RPCApiFetchPrivate(`/SayHello`, {})
 
 			console.log(response)
 			span.textContent = response.message

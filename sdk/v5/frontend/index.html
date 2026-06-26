@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Login</title>
+</head>
+
+<body>
+	<p id="result"></p>
+
+	<h1>Registro de usuario</h1>
+	<form id="form-register">
+		<label>Usuario:</label>
+		<input name="username" autocomplete="username" required><br>
+		<label>Password:</label>
+		<input type="password" name="password" autocomplete="new-password" required><br>
+		<button type="submit">Registrar usuario</button>
+	</form>
+
+	<h1>Login de usuarios</h1>
+	<form id="form-login">
+		<label>Usuario:</label>
+		<input name="username" autocomplete="username" required><br>
+		<label>Password:</label>
+		<input type="password" name="password" required><br>
+		<button type="submit">Logear usuario</button>
+	</form>
+
+	<h2>Logout </h2>
+	<form id="form-logout">
+		<label>Usuario:</label>
+		<input name="username" autocomplete="username" required><br>
+		<label>Password:</label>
+		<input name="password" type="password" placeholder="###"><br>
+		<button type="submit">cerrar sesion</button>
+	</form>
+
+	<h2>Acciones</h2>
+	<button id="btnGetLog" type="submit">Get Log</button>
+	<button id="btnGetHello" type="submit">Get sayHello</button>
+
+</body>
+
+<script>
+
+
+	const span = document.getElementById('result');
+	const form_login = document.getElementById('form-login');
+	const form_register = document.getElementById('form-register');
+	const form_logout = document.getElementById('form-logout');
+
+	const btnGetLog = document.getElementById('btnGetLog');
+	const btnGetHello = document.getElementById('btnGetHello');
+
+
+	let sessionExist = null
+	const APIVersion = "1.0"
+	const PORT = 3000
+	const domain = `http://localhost:${PORT}`
+
+
+	// * HTTP 401
+	class ErrorAuthentication {
+		constructor(data) {
+			this.data = data
+			this.type = 401
+
+		}
+
+		getData() {
+			return this.data
+		}
+
+		getType() {
+			return this.type
+		}
+	}
+
+	// * HTTP 400
+	class ErrorSpecification {
+		constructor(data) {
+			this.data = data
+			this.type = 400
+
+
+		}
+
+		getData() {
+			return this.data
+		}
+
+		getType() {
+			return this.type
+		}
+	}
+
+	// * HTTP 422
+	class ErrorDomain {
+		constructor(data) {
+			this.data = data
+			this.type = 422
+
+		}
+
+		getData() {
+			return this.data
+		}
+
+		getType() {
+			return this.type
+		}
+	}
+
+	// * HTTP 500
+	class ErrorInternServer {
+		constructor(data) {
+			this.data = data
+			this.type = 500
+
+		}
+
+		getData() {
+			return this.data
+		}
+
+		getType() {
+			return this.type
+		}
+	}
+
+
+	async function RPCApiFetchPrivate(path, data) {
+
+		try {
+
+			let object_config = {
+				headers: { "Content-Type": "application/json", "x-api-version": APIVersion, "x-api-key": sessionExist },
+				method: "POST",
+				body: JSON.stringify(data)
+
+			}
+
+			let response = await fetch(domain + path, object_config)
+
+			const result = await response.json()
+
+			console.log("el codigo de estado devuelto por el protocolo http que manipula NODE es: " + response.status)
+			console.log(result)
+			switch (response.status) {
+
+				case 200:
+					return result
+					break;
+				case 401:
+					throw new ErrorAuthentication(result.detail[0] || "Error al autenticar");
+					break;
+				case 400:
+					throw new ErrorSpecification(result.detail[0] || "Error en la especificacion");
+					break;
+				case 422:
+					throw new ErrorDomain(result.detail[0] || "Error en el dominio");
+					break;
+				case 500:
+					throw new ErrorInternServer(result.detail[0] || "Error en el servidor");
+					break;
+
+			}
+
+
+		} catch (err) {
+			throw err
+
+		}
+
+	}
+
+
+	async function RPCApiFetchPublic(path, data) {
+
+		try {
+
+			let object_config = {
+				headers: { "Content-Type": "application/json", "x-api-version": APIVersion },
+				method: "POST",
+				body: JSON.stringify(data)
+
+			}
+
+			let response = await fetch(domain + path, object_config)
+
+			const result = await response.json()
+
+			console.log("el codigo de estado devuelto por el protocolo http que manipula NODE es: " + response.status)
+
+			switch (response.status) {
+
+				case 200:
+					return result
+					break;
+				case 401:
+					throw new ErrorAuthentication(result.detail[0] || "Error al autenticar");
+					break;
+				case 400:
+					throw new ErrorSpecification(result.detail[0] || "Error en la especificacion");
+					break;
+				case 422:
+					throw new ErrorDomain(result.detail[0] || "Error en el dominio");
+					break;
+				case 500:
+					throw new ErrorInternServer(result.detail[0] || "Error en el servidor");
+					break;
+
+			}
+
+
+		} catch (err) {
+
+			throw err
+
+		}
+
+	}
+
+
+	// Función para calcular el hash SHA-256 de una cadena
+	async function calcularHashSHA256(cadena) {
+		// * creo un objeto para convertir la cadena a un formato de bytes
+		const encoder = new TextEncoder();
+		// * convierto la cadena a un array de bytes
+		const data = encoder.encode(cadena);
+		// * aplico el algoritmo SHA-256 al array de bytes y obtengo el resultado como un array de bytes
+		const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+		// * transformo el array de bytes en un array de números
+		const hashArray = Array.from(new Uint8Array(hashBuffer));
+		// * convierto el array de números en una cadena hexadecimal
+		const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+
+		return hashHex;
+	}
+
+	async function getDataLogin(event) {
+		event.preventDefault()
+		const formdata = new FormData(form_login)
+		const data = Object.fromEntries(formdata);
+		data.password = await calcularHashSHA256(data.password)
+		sendDataLogin(data);
+
+	}
+
+	async function sendDataLogin(data) {
+
+		try {
+
+			const response = await RPCApiFetchPublic("/Login", data)
+
+			span.textContent = `Usuario ${response.name} ah sido logueado con exito`
+			sessionExist = response.session.name
+			console.log(response)
+
+		} catch (err) {
+			console.log(err)
+			switch (err.getType()) {
+
+				case 401:
+					//throw new ErrorAuthentication(result.detail[0] || "Error al autenticar");
+					alert(err.getData())
+					break;
+				case 400:
+					//throw new ErrorSpecification(result.detail[0] || "Error en la especificacion");
+					alert(err.getData())
+					break;
+				case 422:
+					//throw new ErrorDomain(result.detail[0] || "Error en el dominio");
+					alert(err.getData())
+					break;
+				case 500:
+					//throw new ErrorInternServer(result.detail[0] || "Error en el servidor");
+					alert(err.getData())
+					break;
+
+			}
+
+		}
+
+
+	}
+
+
+
+	async function getDataRegister(event) {
+
+		event.preventDefault()
+		const formdata = new FormData(form_register)
+		const data = Object.fromEntries(formdata)
+
+		data.password = await calcularHashSHA256(data.password)
+		await sendDataRegister(data)
+
+	}
+
+	async function sendDataRegister(data) {
+
+		try {
+			const response = await RPCApiFetchPublic(`/Register`, data)
+
+			span.textContent = `Usuario ${response.username} ah sido registrado con exito`
+
+		} catch (error) {
+
+			switch (error.getType()) {
+
+				case 401:
+					//throw new ErrorAuthentication(result.detail[0] || "Error al autenticar");
+					alert(error.getData())
+					break;
+				case 400:
+					//throw new ErrorSpecification(result.detail[0] || "Error en la especificacion");
+					alert(error.getData())
+					break;
+				case 422:
+					//throw new ErrorDomain(result.detail[0] || "Error en el dominio");
+					alert(error.getData())
+					break;
+				case 500:
+					//throw new ErrorInternServer(result.detail[0] || "Error en el servidor");
+					alert(error.getData())
+					break;
+
+			}
+
+		}
+
+	}
+
+	async function getDataLogout(event) {
+		event.preventDefault()
+		const formdata = new FormData(form_logout)
+		const data = Object.fromEntries(formdata);
+		data.password = await calcularHashSHA256(data.password)
+		sendDataLogout(data);
+
+	}
+
+	async function sendDataLogout(data) {
+
+
+		try {
+
+			const response = await RPCApiFetchPrivate(`/Logout`, data)
+
+			span.textContent = `Usuario ${response.name} ah sido deslogueado con exito`
+			console.log(response)
+		} catch (error) {
+			switch (error.getType()) {
+
+				case 401:
+					//throw new ErrorAuthentication(result.detail[0] || "Error al autenticar");
+					alert(error.getData())
+					break;
+				case 400:
+					//throw new ErrorSpecification(result.detail[0] || "Error en la especificacion");
+					alert(error.getData())
+					break;
+				case 422:
+					//throw new ErrorDomain(result.detail[0] || "Error en el dominio");
+					alert(error.getData())
+					break;
+				case 500:
+					//throw new ErrorInternServer(result.detail[0] || "Error en el servidor");
+					alert(error.getData())
+					break;
+
+			}
+
+		}
+
+
+	}
+
+	async function getLog_handler(event) {
+
+		try {
+
+			const response = await RPCApiFetchPrivate(`/Log`, {})
+
+			span.textContent = response.message
+
+			console.log(response)
+
+
+		} catch (error) {
+			console.log(sessionExist)
+
+			switch (error.getType()) {
+
+				case 401:
+					//throw new ErrorAuthentication(result.detail[0] || "Error al autenticar");
+					alert(error.getData())
+					break;
+				case 400:
+					//throw new ErrorSpecification(result.detail[0] || "Error en la especificacion");
+					alert(error.getData())
+					break;
+				case 422:
+					//throw new ErrorDomain(result.detail[0] || "Error en el dominio");
+					alert(error.getData())
+					break;
+				case 500:
+					//throw new ErrorInternServer(result.detail[0] || "Error en el servidor");
+					alert(error.getData())
+					break;
+
+			}
+
+		}
+	}
+
+
+	async function getHello_handler(event) {
+
+		try {
+
+			const response = await RPCApiFetchPrivate(`/SayHello`, {})
+
+			console.log(response)
+			span.textContent = response.message
+
+		} catch (error) {
+
+			switch (error.getType()) {
+
+				case 401:
+					//throw new ErrorAuthentication(result.detail[0] || "Error al autenticar");
+					alert(error.getData())
+					break;
+				case 400:
+					//throw new ErrorSpecification(result.detail[0] || "Error en la especificacion");
+					alert(error.getData())
+					break;
+				case 422:
+					//throw new ErrorDomain(result.detail[0] || "Error en el dominio");
+					alert(error.getData())
+					break;
+				case 500:
+					//throw new ErrorInternServer(result.detail[0] || "Error en el servidor");
+					alert(error.getData())
+					break;
+
+			}
+
+		}
+	}
+
+
+	function main() {
+		form_register.onsubmit = getDataRegister
+		form_login.onsubmit = getDataLogin;
+		form_logout.onsubmit = getDataLogout;
+
+		btnGetLog.onclick = getLog_handler;
+		btnGetHello.onclick = getHello_handler;
+	}
+
+	window.onload = main;
+
+</script>
+
+</html>

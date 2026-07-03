@@ -17,10 +17,10 @@ class HeaderWC extends HTMLElement {
         this.label = document.createElement("label")
         this.iconBurger = this.createIcon("fa fa-bars")
 
-        this.bttn1 = this.createButtonHeader("w3-button w3-large w3-opacity-min")
+        this.bttn1 = this.createButtonHeader("w3-button w3-opacity-min")
         this.iconBuzon = this.createIcon("fa fa-envelope-open")
 
-        this.bttn2 = this.createButtonHeader("w3-button w3-large w3-opacity-min")
+        this.bttn2 = this.createButtonHeader("w3-button w3-opacity-min")
         this.iconAlert = this.createIcon("fa fa-bell")
 
         this.profile = this.createIcon("fa fa-fw fa-user fa")
@@ -57,11 +57,11 @@ class HeaderWC extends HTMLElement {
         // const divProfile = document.createElement("div")
 
         this.className = "w3-flex-bar w3-theme w3-left-align"
-        this.style = "height:70px; padding:0 5px 0 5px;"
+        this.style = "height:70px; padding:0 10px 0 10px;"
 
 
         this.h5.style = "line-height:1; margin:0!important; font-weight:300"
-        // this.h5.className = "admin-logo w3-bar-item w3-hide-medium w3-hide-small"
+        this.h5.className = "admin-logo w3-bar-item w3-hide-medium w3-hide-small"
 
         // const a = document.createElement("a")
         this.a.href = "./index.html"
@@ -82,7 +82,7 @@ class HeaderWC extends HTMLElement {
 
 
         // const label = document.createElement("label")
-        this.label.className = "w3-button w3-large w3-opacity-min"
+        this.label.className = "w3-button w3-opacity-min"
         this.label.htmlFor = "sidebar-control"
 
         // const iconBurger = this.createIcon("fa fa-bars")
@@ -103,11 +103,11 @@ class HeaderWC extends HTMLElement {
         // this.divButtons.appendChild(this.bttn2)
         // this.bttn2.appendChild(this.iconAlert)
 
-        this.divProfile.className = "w3-circle w3-center w3-text-white w3-primary"
-        this.divProfile.style = "width:38px; height:38px"
+        this.divProfile.className = "w3-circle w3-center w3-text-white w3-primary w3-button"
+        this.divProfile.style = "width:38px; height:38px; display:flex; align-items:center; justify-content:center; "
 
         // this.profile = this.createIcon("fa fa-fw fa-user fa")
-        this.profile.style = "margin-top:11px"
+        this.profile.style = "font-size: 15px;"
 
         // this.divProfile.appendChild(this.profile)
 

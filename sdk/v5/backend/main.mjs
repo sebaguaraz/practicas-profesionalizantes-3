@@ -6,6 +6,8 @@ import { resolve } from 'node:path';
 import { error } from 'node:console';
 import { throws } from 'node:assert/strict';
 
+import { sendError } from "./helpers.js"
+
 function default_config() {
     const config =
     {
@@ -353,8 +355,9 @@ async function login_handler(request, response) {
                     break;
             }
 
-            response.writeHead(codeStatus, { 'Content-Type': 'application/json' });
-            response.end(JSON.stringify(message));
+            sendError(response, codeStatus, message)
+            // response.writeHead(codeStatus, { 'Content-Type': 'application/json' });
+            // response.end(JSON.stringify(message));
         }
     });
 
@@ -408,9 +411,9 @@ function logout_handler(request, response) {
                     break;
             }
 
-
-            response.writeHead(codeStatus, { 'Content-Type': 'application/json' });
-            response.end(JSON.stringify(message));
+            sendError(response, codeStatus, message)
+            // response.writeHead(codeStatus, { 'Content-Type': 'application/json' });
+            // response.end(JSON.stringify(message));
 
         }
     });
@@ -434,11 +437,17 @@ async function register_handler(request, response) {
             const { username, password } = data
 
             if (!username || !password) {
-                response.writeHead(400, { 'Content-Type': 'application/json' });
-                return response.end(JSON.stringify({
+
+                return sendError(response, 400, {
                     exception: "DATOS_INVALIDOS",
                     detail: ["Faltan campos"]
-                }));
+                })
+
+                // response.writeHead(400, { 'Content-Type': 'application/json' });
+                // return response.end(JSON.stringify({
+                //     exception: "DATOS_INVALIDOS",
+                //     detail: ["Faltan campos"]
+                // }));
             }
 
             const output = await createUser(db, username, password);
@@ -447,14 +456,21 @@ async function register_handler(request, response) {
             response.end(JSON.stringify({ username: output.username }));
         }
         catch (err) {
-            response.writeHead(500);
-            response.end(JSON.stringify(
-                {
-                    exception: "ERROR_INTERNO_SERVIDOR",
-                    detail: [err.message]
-                }
 
-            ));
+            sendError(response, 500, {
+                exception: "ERROR_INTERNO_SERVIDOR",
+                detail: [err.message]
+            })
+
+
+            // response.writeHead(500);
+            // response.end(JSON.stringify(
+            //     {
+            //         exception: "ERROR_INTERNO_SERVIDOR",
+            //         detail: [err.message]
+            //     }
+
+            // ));
         }
 
     });
